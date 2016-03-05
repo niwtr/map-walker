@@ -18,6 +18,14 @@ Contact: 1456415911@qq.com
 2016-3-3
 Our project has been launched! Thanks to all of us!
 
+2016-3-5
+First developers' meeting, decision of language, utilities, facilities and organization!
+
+
+
+
+
+
 ## License
 We use MIT License.
 Each distribution of this software must contain a copy of a LICENSE file.
