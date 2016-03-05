@@ -11,7 +11,7 @@ Han Liu
 Contact: liuhan132@foxmail.com
 
 Mo Ying
-Contact:
+Contact: 1456415911@qq.com
 
 ## Current development process
 
