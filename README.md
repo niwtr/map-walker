@@ -21,7 +21,11 @@ Our project has been launched! Thanks to all of us!
 2016-3-5
 First developers' meeting, decision of language, utilities, facilities and organization!
 
+2016-3-6
+Second developers’ meeting, finished requirement analysis, pushing the development into general design progress.
 
+2016-3-7
+Decision of using Python 2.7 has been changed to using Python 3.4. Keeping sharp & new is far better than staying outdated.
 
 
 
