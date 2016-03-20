@@ -27,6 +27,8 @@ Second developers’ meeting, finished requirement analysis, pushing the develop
 2016-3-7
 Decision of using Python 2.7 has been changed to using Python 3.4. Keeping sharp & new is far better than staying outdated.
 
+2016-3-20
+beginning designation.
 
 
 
