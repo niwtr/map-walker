@@ -1,10 +1,15 @@
 '''
 Mailer, a module communication protocol.
-Current version: 0.2 2016/3/21
+Current version: 0.3 2016/3/22
 Design: Heranort
 '''
 
-
+'''
+**************************************NEWS**************************************
+0.3:
+Fixed return values (see test examples!)
+********************************************************************************
+'''
 
 '''
 Mail generator.
@@ -44,8 +49,7 @@ def plus3(a,b,c):
     return a+b+c
 a_mail=mail("hello, world",plus3,1,2,3)
 
-a_mail(c(
->>6)
+>>6
 a_mail.the_tag()
 >>"hello, world"
 ________________________________________________________________________________
@@ -117,10 +121,14 @@ core.mailbox.send(route.mailbox, FUNCTION_SHORTEST_PATH, "Changsha", "Wuhan")
 **The message was described above.**
 ________________________________________________________________________________
 display_mails: display the messages got and do nothing.
-
+display_history: display the preserved history.
 ex. core.mailbox.display_mails()
 ________________________________________________________________________________
-read_all:read all the mails.
+read_all:read all the mails and ignore.
+read_all_history: read all the mails and clear history.
+________________________________________________________________________________
+preserve: preserve the mails in history.
+trash: delete current mail.(unread)
 ________________________________________________________________________________
 %%
 
@@ -129,10 +137,14 @@ Design: Heranort
 
 class mailbox():
     
-    maillist=[]
-    history=[]
-    history_len=10
-    mail_address=""
+    
+    maillist=[]             #container of mails
+    
+    history=[]              #container of histories
+    
+    history_len=10          #maximum length of history container
+    
+    mail_address=""         #tag of the mailbox, can be showed in mails
     
     def __init__(self, mail_address, history_len=10):
         self.mail_address=mail_address
@@ -141,88 +153,118 @@ class mailbox():
     def get_mail_address(self):
         return self.mail_address
 
+    #read and ignore.
     def read(self, arg=0):
         if(len(self.maillist)!=0):
-            self.maillist.pop(0)(arg)
-            
+            return self.maillist.pop(0)(arg)
+        
+    #read and preserve in history.       
     def pread(self, arg=0):
         if(len(self.maillist)!=0):
             closure=self.maillist.pop(0)            
         if (len(self.history)>self.history_len):
             self.history.pop(0)
         self.history.append(closure)
-        closure(arg)
+        return closure(arg)
         
+    #read the first history.    
     def read_again(self, arg=0):
         if(len(self.history)!=0):
-            self.history.pop(0)(arg)
-            
+            return self.history.pop(0)(arg)
+
+    #read and mark it as new.        
     def check(self, arg=0):
         if(len(self.maillist)!=0):
-            self.maillist[0](arg)
-            
+            return self.maillist[0](arg)
+    
+    #delete the mail.        
     def trash(self):
         if(len(self.maillist)!=0):
             self.maillist.pop(0)
-            
+    
+    #do not read and preserve in history.        
     def preserve(self):
         if (len(self.maillist)!=0):
             closure=self.maillist.pop(0)
         self.history.append(closure)
-        
+    
+    #read all of the mails and ignore.    
     def read_all(self, args=[]):
+        retv=[]
         for mail in self.maillist:
             if (args!=[]):
-                mail(args.pop(0))
+                retv.append(mail(args.pop(0)))
             else:
-                mail()
+                retv.append(mail())
         self.maillist.clear()
-        
+        return retv
+    
+    #delete all the histories     
     def clear_history(self):
         self.history.clear()
 
+    #read all the histories, and clear.
     def read_all_history(self, args=[]):
+        retv=[]
         for mail in self.history:
             if(args!=[]):
-                mail(args.pop(0))
+                retv.append(mail(args.pop(0)))
             else:
-                mail()
+                retv.append(mail())
         self.maillist.clear()
+        return retv
         
     def get_mail(self,msg):    
         self.maillist.append(msg)
 
+    #send mails to other mailbox
     def send(self,mailb,*msg):
         mailb.get_mail(mail(self.get_mail_address(),*msg))
 
+    #show all the mails in mailbox
     def display_mails(self):
         for mail in self.maillist:
-            print ("Mail from",mail('tag'),"with content",mail('describe'))
-            
+            print ("##Mail from",mail('tag'),"with content",mail('describe'))
+
+    #show all the mails in history.
     def display_histroy(self):
         for mail in self.history:
-            print("History mail from",mail('tag'),"with content",mail('describe'))
+            print("##History mail from",mail('tag'),"with content",mail('describe'))
 
 
-##testing.
-
-
-
+#test examples.
 '''
+
+def plusall(*args):
+    def iiter(acc,args):
+        if(len(args)==0):
+            return acc
+        else:
+            return iiter(acc+args[0],args[1:])
+    return iiter(0,args)
+
+    
 maila=mailbox('maila')
 mailb=mailbox('mailb')
 
-maila.send(mailb, print, "hello", "world1")
-maila.send(mailb, print, "hello", "world2")
-maila.send(mailb, print, "hello", "world3")
-maila.send(mailb, print, "hello", "world4")
-maila.send(mailb, print, "hello", "world5")
+maila.send(mailb, print, "hello", "world")
+maila.send(mailb,plusall, 1,2,3,4,5)
+maila.send(mailb,plusall, 1,2,3,5)
+maila.send(mailb,plusall, 1,2,4,5)
+maila.send(mailb,plusall, 1,3,4,5)
+maila.send(mailb,plusall, 2,3,4,5)
+maila.send(mailb,plusall, 1,2,3)
+maila.send(mailb,plusall, 3,4,5)
+
 mailb.display_mails()
-mailb.pread()
+mailb.read()
+a=mailb.read()
+mailb.preserve()
 mailb.display_mails()
-mailb.pread()
 mailb.trash()
-mailb.read_all([1,'tag'])
+b=mailb.read_all([1,'tag'])
 mailb.display_histroy()
-mailb.read_all_history()
+c=mailb.read_all_history()
+print("a=",a,"b=",b,"c=",c)
+
 '''
