@@ -56,10 +56,10 @@ class transmit_environment():
     '''
     connect the core pipe into this module and initialize the environment itself.
     ##
-    __core_funcall_pipe: core pipe.
+    mail: mailer of the core.
     ##
     '''
-    def __init__(self, __core_funcall_pipe):
+    def __init__(self, mail):
         pass
     
     
