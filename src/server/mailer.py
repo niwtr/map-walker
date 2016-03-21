@@ -1,6 +1,6 @@
 '''
 Mailer, a module communication protocol.
-Current version: 0.1 2016/3/21
+Current version: 0.2 2016/3/21
 Design: Heranort
 '''
 
@@ -44,8 +44,8 @@ def plus3(a,b,c):
     return a+b+c
 a_mail=mail("hello, world",plus3,1,2,3)
 
-a_mail(c
->>6
+a_mail(c(
+>>6)
 a_mail.the_tag()
 >>"hello, world"
 ________________________________________________________________________________
@@ -53,15 +53,26 @@ ________________________________________________________________________________
 '''
 
 def mail(tag, func, *args):
+    
     def call():
         return func(*args)
-    def the_tag():
+    def showtag():
         return tag
+    def describe():
+        return (func, args)
+    def do_not_call():
+        pass
+    
     def dispatch(method=0):
-        if method=='tag':
-            return tag
-        else: 
+        if (method=='tag'):
+            return showtag()
+        elif (method=='describe'):
+            return describe()
+        elif (method=='pass'):
+            return do_not_call()
+        else:
             return call()
+    
     return dispatch
 
 
@@ -80,6 +91,8 @@ This term of model ensures the uniqueness and clearness of interfaces between
 any two modules. Besides, it allows tracking of message communication, which 
 is absolutely convenient for debugging and testing.
 
+The only con of this mechanism is that it is preserved only for side-effect
+procedures, not for functions.
 ##
 maillist: messages to be read,
 ##
@@ -89,6 +102,12 @@ ________________________________________________________________________________
 read: read the first message before trashing and do the required behavior.
 
 ex. core.mailbox.read()
+________________________________________________________________________________
+check: read the first message and do not destroy.
+ex. core.mailbox.check()
+________________________________________________________________________________
+pread: (read and preserve) read the first message and preserve it in history.
+ex.core.mailbox.pread()
 ________________________________________________________________________________
 send: push the required message to the mailbox of *other* module.
 
@@ -111,10 +130,13 @@ Design: Heranort
 class mailbox():
     
     maillist=[]
+    history=[]
+    history_len=10
     mail_address=""
     
-    def __init__(self, mail_address):
+    def __init__(self, mail_address, history_len=10):
         self.mail_address=mail_address
+        self.history_len=history_len
         
     def get_mail_address(self):
         return self.mail_address
@@ -122,10 +144,46 @@ class mailbox():
     def read(self, arg=0):
         if(len(self.maillist)!=0):
             self.maillist.pop(0)(arg)
-
+            
+    def pread(self, arg=0):
+        if(len(self.maillist)!=0):
+            closure=self.maillist.pop(0)            
+        if (len(self.history)>self.history_len):
+            self.history.pop(0)
+        self.history.append(closure)
+        closure(arg)
+        
+    def read_again(self, arg=0):
+        if(len(self.history)!=0):
+            self.history.pop(0)(arg)
+            
+    def check(self, arg=0):
+        if(len(self.maillist)!=0):
+            self.maillist[0](arg)
+            
+    def trash(self):
+        if(len(self.maillist)!=0):
+            self.maillist.pop(0)
+            
+    def preserve(self):
+        if (len(self.maillist)!=0):
+            closure=self.maillist.pop(0)
+        self.history.append(closure)
+        
     def read_all(self, args=[]):
         for mail in self.maillist:
             if (args!=[]):
+                mail(args.pop(0))
+            else:
+                mail()
+        self.maillist.clear()
+        
+    def clear_history(self):
+        self.history.clear()
+
+    def read_all_history(self, args=[]):
+        for mail in self.history:
+            if(args!=[]):
                 mail(args.pop(0))
             else:
                 mail()
@@ -139,19 +197,32 @@ class mailbox():
 
     def display_mails(self):
         for mail in self.maillist:
-            print ("Mail",mail,"from", mail('tag'))
-
+            print ("Mail from",mail('tag'),"with content",mail('describe'))
+            
+    def display_histroy(self):
+        for mail in self.history:
+            print("History mail from",mail('tag'),"with content",mail('describe'))
 
 
 ##testing.
+
+
+
+'''
 maila=mailbox('maila')
 mailb=mailbox('mailb')
+
 maila.send(mailb, print, "hello", "world1")
 maila.send(mailb, print, "hello", "world2")
 maila.send(mailb, print, "hello", "world3")
 maila.send(mailb, print, "hello", "world4")
 maila.send(mailb, print, "hello", "world5")
 mailb.display_mails()
-mailb.read()
+mailb.pread()
 mailb.display_mails()
+mailb.pread()
+mailb.trash()
 mailb.read_all([1,'tag'])
+mailb.display_histroy()
+mailb.read_all_history()
+'''
