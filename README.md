@@ -1,4 +1,4 @@
-# map-walker, an ultimate solution to integrated path-guiding software
+# map-walker, the ultimate solution to integrated path-guiding software
 
 ## Acknowledges
 This is the repository for Data Structure assignments of a BUPT team.
@@ -26,6 +26,10 @@ Second developers’ meeting, finished requirement analysis, pushing the develop
 
 2016-3-7
 Decision of using Python 2.7 has been changed to using Python 3.4. Keeping sharp & new is far better than staying outdated.
+
+
+
+
 
 
 ## License
