@@ -21,17 +21,6 @@ First published: 2016-3-10
 
 
 
-'''should report error.'''
-
-
-def missing_key(key):
-    pass
-
-
-class enhanced_dict(dict):
-    def __missing__(self, key):
-        return []
-
 
 '''
 ################################################################################
@@ -49,13 +38,20 @@ class M_A_S_S():
     
     sock=[]
         
+    address='127.0.0.1'
     
-    def __init__(self):
+    com=9999
+    
+    machine=print
+    
+    def __init__(self,plist,machine):
+        self.server_name=plist['name']
+        self.server_welcome_string=plist['welcome']
+        self.address=plist['address']
+        self.com=plist['com']
+        self.machine=machine
         pass
-    
-    
-    def close_sock(self,sock):
-        sock.close()
+
     
         
      #function for managing the link between S and C
@@ -65,7 +61,7 @@ class M_A_S_S():
         machine(sock)            
         print (self.server_name+':'+'connection from %s:%s closed.' % addr)
     
-    def sock_tcp_establish(self, ip_addr='127.0.0.1', com=9997):
+    def sock_tcp_establish(self, ip_addr, com):
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #bind socket to this.
         s.bind((ip_addr,com))
@@ -75,8 +71,7 @@ class M_A_S_S():
         print (self.server_name+':'+'waiting for connection...')
         return s
     
-    def close_sock(self,sock):
-        sock.close()    
+ 
         
     def speak_to_client(self, sock, string):
         estring=string.encode('utf-8')
@@ -84,11 +79,12 @@ class M_A_S_S():
         
         
      ##no method for closing a thread?   
-    def start_serv_proc(self, s, machine):
-            sock,addr=s.accept()
-            self.sock=sock
-            t=threading.Thread(target=self.linque_fn,args=(sock,addr,machine))
-            t.start()   
+    def start(self):
+        s=self.sock_tcp_establish(self.address, self.com)
+        sock,addr=s.accept()
+        self.sock=sock
+        t=threading.Thread(target=self.linque_fn,args=(sock,addr,self.machine))
+        t.start()   
 
 
 
@@ -121,8 +117,28 @@ class transmit_env(M_A_S_S):
 
     core_mail_binding=[]
     
+    s1=s2=[]
+    
+    #speed=[]
+    default_MASS_plist={
+        
+        'name'    : 'SERVER',
+        'welcome' : 'Enjoy working with MASS.',
+        'address' : '127.0.0.1',
+        'com'     : 9999,
+        
+    }
+    default2_MASS_plist={
+    
+        'name'    : 'SERVER',
+        'welcome' : 'Enjoy working with MASS.',
+        'address' : '127.0.0.1',
+        'com'     : 9990,
+    
+    }        
 
- 
+    def the_env(self):
+        return self
     
     '''
     connect the core pipe into this module and initialize the environment itself.
@@ -135,8 +151,8 @@ class transmit_env(M_A_S_S):
         self.core_mail_binding=core_mail
         self.cmail=mailer.mailbox('transmitter',50)
         
-    
-    
+        self.s1=M_A_S_S(self.default_MASS_plist,self.machine)
+        self.s2=M_A_S_S(self.default2_MASS_plist,self.machine)        
     
     '''
     used in the tcp_server as message handler.
@@ -151,36 +167,39 @@ class transmit_env(M_A_S_S):
     
     '''
     
-    
     def cmd_interpreter(self,cmd,sock):
         
         if cmd=='sayhello':
             self.cmail.send(self.cmail,self.speak_to_client,sock,'hello?')
         else:
-            self.cmail.send(self.cmail, self.speak_to_client,sock,'erl')
+            self.cmail.send(self.cmail, self.speak_to_client,sock,'erl')  ##error: unrecognized command
     
-    
-    def machine(self,sock):
 
+    def machine(self,sock):
+        print (sock)
         while True:
             data=sock.recv(1024) #maximum content of message
-            time.sleep(1)  #essential time sleep
+            time.sleep(0.5)  #essential time sleep
             ddata=data.decode('utf-8')
-            if(ddata=='exit'):
-                self.sock.close()
-                return 0
             
-            self.cmd_interpreter(ddata, sock)
+            if(ddata=='exit'):
+                self.speak_to_client(sock, 'closed')
+                sock.close()
+                return 0
+            else: 
+                self.cmd_interpreter(ddata, sock)
+                
             self.cmail.display_mails()
             self.cmail.read_all()
-    
-    def start_server(self):
-        self.start_serv_proc(self.sock_tcp_establish(),self.machine)
 
-  
+
+
+
     
 a=transmit_env([])
-a.start_server()
+
+a.s1.start()
+a.s2.start()
 
 
 '''class for writing logs.'''
@@ -216,4 +235,4 @@ class transmit_logger():
     def send_transmit_log(message,bad_p,lcode):
         pass
     
-    
+  
