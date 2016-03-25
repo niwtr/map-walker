@@ -161,11 +161,13 @@ class mailbox():
     #read and preserve in history.       
     def pread(self, arg=0):
         if(len(self.maillist)!=0):
-            closure=self.maillist.pop(0)            
-        if (len(self.history)>self.history_len):
-            self.history.pop(0)
-        self.history.append(closure)
-        return closure(arg)
+            closure=self.maillist.pop(0)
+            if (len(self.history)>self.history_len):
+                self.history.pop(0)
+            self.history.append(closure)
+            return closure(arg)
+        else: 
+            pass
         
     #read the first history.    
     def read_again(self, arg=0):
@@ -186,7 +188,7 @@ class mailbox():
     def preserve(self):
         if (len(self.maillist)!=0):
             closure=self.maillist.pop(0)
-        self.history.append(closure)
+            self.history.append(closure)
     
     #read all of the mails and ignore.    
     def read_all(self, args=[]):
@@ -256,8 +258,10 @@ maila.send(mailb,plusall, 2,3,4,5)
 maila.send(mailb,plusall, 1,2,3)
 maila.send(mailb,plusall, 3,4,5)
 
-mailb.display_mails()
-mailb.read()
+#mailb.display_mails()
+mailb.pread()
+mailb.display_histroy()
+
 a=mailb.read()
 mailb.preserve()
 mailb.display_mails()
@@ -266,5 +270,4 @@ b=mailb.read_all([1,'tag'])
 mailb.display_histroy()
 c=mailb.read_all_history()
 print("a=",a,"b=",b,"c=",c)
-
 '''
