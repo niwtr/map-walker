@@ -1,6 +1,6 @@
 '''
-Current version : 0.1
-2016-3-25
+Current version : 0.13
+2016-3-26
 by Heranort 
 '''
 
@@ -10,7 +10,7 @@ import threading                                #for thread creation
 import socket                                   #socket offical module
 import time                                     #time official module
 
-
+import os                                       #for fortune!
 import mailer                                   #mailer module.
 
 
@@ -113,6 +113,7 @@ class M_A_S_S():
     '''
     def sock_tcp_establish(self, ip_addr, com):
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) ##testing.
         #bind socket to this.
         s.bind((ip_addr,com))
         s.listen(5)  
@@ -143,6 +144,7 @@ class M_A_S_S():
         self.sock=sock
         t=threading.Thread(target=self.linque_fn,args=(sock, addr))
         t.start()   
+        
 
 
 
@@ -156,7 +158,15 @@ core_mail_binding: Pipe for communicating with core module.
 MASSES: A list of MASSES.
 ################################################################################
 '''
+dispatch_plist={
 
+    'name'    : 'DISPATCH_SERVER_COM_9999',
+    'welcome' : 'Enjoy working with MASS. --9999',
+    'address' : '127.0.0.1',
+    'com'     : 9999,
+    'speed'   : 0.1
+
+}
 
 class transmit_env():    
     
@@ -168,20 +178,27 @@ class transmit_env():
     
     MASSES=[]
     
+    dispatcher_MASS=[]
+    
+    current_idleing_server_com=9998
+    
     '''
     Connect the core pipe into this module and initialize the environment itself.
     Create the MASSES.
     
     core_mail: mailbox of the core module. 
     '''
+    
     def __init__(self,core_mail):
         
         self.core_mail_binding=core_mail
         self.cmail=mailer.mailbox('transmitter',50)
-        
+        self.dispatcher_MASS=M_A_S_S(dispatch_plist,self.com_dispatcher_machine)
         for pl in M_A_S_S_PLIST:
             self.MASSES.append(M_A_S_S(pl,self.machine))
         
+    def init_dispatcher_MASS(self):
+        self.dispatcher_MASS=M_A_S_S(dispatch_plist,self.com_dispatcher_machine)
         
     
     '''
@@ -205,6 +222,8 @@ class transmit_env():
             self.cmail.send(self.cmail,MASS.speak_to_client,MASS.server_name)
         elif cmd=='welcome me':
             self.cmail.send(self.cmail,MASS.speak_to_client,MASS.server_welcome_string)
+        elif cmd=='fortune':
+            self.cmail.send(self.cmail,MASS.speak_to_client,os.popen('fortune').read())
         else:
             self.cmail.send(self.cmail, MASS.speak_to_client,'ERROR LANG: '+cmd)  ##error: unrecognized command
     
@@ -235,6 +254,26 @@ class transmit_env():
                 
             self.cmail.display_mails()
             self.cmail.read_all()    #execute all the mails.
+     
+    def com_dispatcher_machine(self, MASS):
+        sock=MASS.sock
+        print(MASS.server_name+': '+'COM_DISPATCHER_MACHINE IS RUNNING.')
+        time.sleep(MASS.speed)
+        MASS.speak_to_client(str(self.current_idleing_server_com))
+        return 
+        
+        
+    def seq_start(self):
+        def __seq_start():
+            for mass in self.MASSES:
+                self.current_idleing_server_com=mass.com
+                self.init_dispatcher_MASS()
+                self.dispatcher_MASS.start()
+                mass.start()
+            while 1:
+                print("Streaming...")
+                time.sleep(2)
+        __seq_start()
 
 
 
@@ -242,12 +281,12 @@ class transmit_env():
     
 a=transmit_env([])
 
-for MASS in a.MASSES:
-    MASS.start()
-    
-while(1):
-    print("Streaming...")
-    time.sleep(1)
+a.seq_start()
+
+
+
+
+
 
 
 '''class for writing logs.'''
