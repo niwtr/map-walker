@@ -18,6 +18,7 @@ import mailer                                   #mailer module.
 
 
 from mass_plists import M_A_S_S_PLIST           #property list for MASSES
+from mass_plists import dispatch_plist
 
 '''
 ################################################################################
@@ -25,6 +26,7 @@ from mass_plists import M_A_S_S_PLIST           #property list for MASSES
 Modularized Abstract Socket Server (MASS) for TCP linking, and server environment
 Authorized by Herathol Nortzor
 First published: 2016-3-10
+bugs: when sending the empty line, the pipe brokes.
 ################################################################################
 '''
 
@@ -158,15 +160,7 @@ core_mail_binding: Pipe for communicating with core module.
 MASSES: A list of MASSES.
 ################################################################################
 '''
-dispatch_plist={
 
-    'name'    : 'DISPATCH_SERVER_COM_9999',
-    'welcome' : 'Enjoy working with MASS. --9999',
-    'address' : '127.0.0.1',
-    'com'     : 9999,
-    'speed'   : 0.1
-
-}
 
 class transmit_env():    
     
@@ -193,7 +187,8 @@ class transmit_env():
         
         self.core_mail_binding=core_mail
         self.cmail=mailer.mailbox('transmitter',50)
-        self.dispatcher_MASS=M_A_S_S(dispatch_plist,self.com_dispatcher_machine)
+        self.init_dispatcher_MASS()
+#        self.dispatcher_MASS=M_A_S_S(dispatch_plist,self.com_dispatcher_machine)
         for pl in M_A_S_S_PLIST:
             self.MASSES.append(M_A_S_S(pl,self.machine))
         
@@ -226,6 +221,7 @@ class transmit_env():
             self.cmail.send(self.cmail,MASS.speak_to_client,os.popen('fortune').read())
         else:
             self.cmail.send(self.cmail, MASS.speak_to_client,'ERROR LANG: '+cmd)  ##error: unrecognized command
+            
     
     '''
     Algorithm machine. Controls how the MASS works.
@@ -276,15 +272,17 @@ class transmit_env():
         __seq_start()
 
 
-
 '''.....................testing and usage.......................................'''
     
 a=transmit_env([])
 
-a.seq_start()
 
-
-
+def __core():
+    while True:
+        print('Waiting for signals ...')
+        time.sleep(1)
+threading.Thread(target=a.seq_start, args=()).start()
+__core()
 
 
 

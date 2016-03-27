@@ -19,14 +19,20 @@ def speak_to_server(s):
     
     while(1):
         print('SPEAK: ',end=''),
+        dd=[]
         str=input().encode('utf-8')
-        s.send(str)
-        dd=s.recv(1024).decode('utf-8')
-        if(dd=='closed'):
-            s.close()
-            break
+        if (str):
+            s.send(str)
+            dd=s.recv(1024).decode('utf-8')
+            if(dd=='closed'):
+                s.close()
+                break
+            else:
+                print(dd)
         else:
-            print(dd)
+            print('No inputs. Type again.')    
+
+
 
 
 speak_to_server(s)
