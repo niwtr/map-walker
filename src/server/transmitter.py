@@ -1,5 +1,5 @@
 '''
-Current version : 0.13
+Current version : 0.2
 2016-3-26
 by Heranort 
 '''
@@ -18,7 +18,7 @@ import mailer                                   #mailer module.
 
 
 from mass_plists import M_A_S_S_PLIST           #property list for MASSES
-from mass_plists import dispatch_plist
+from mass_plists import DISPATCH_PLIST
 
 '''
 ################################################################################
@@ -26,7 +26,7 @@ from mass_plists import dispatch_plist
 Modularized Abstract Socket Server (MASS) for TCP linking, and server environment
 Authorized by Herathol Nortzor
 First published: 2016-3-10
-bugs: when sending the empty line, the pipe brokes.
+
 ################################################################################
 '''
 
@@ -55,7 +55,7 @@ Happy hacking with the M_A_S_S!
 
 
 class M_A_S_S():
-    
+    plist=[]
     sock=[]                                #the actual socket binding
         
     address='127.0.0.1'                    #ip address.
@@ -66,6 +66,7 @@ class M_A_S_S():
     
     speed=0.5                              #the duration for the machine to idle
     
+    sock_thread=threading.Thread()
     '''
     Initialize the M_A_S_S, needs a property list and a machine.
     The property list is designed for this actual scenery, it would look like this:
@@ -85,6 +86,7 @@ class M_A_S_S():
     inner-function algorithm. 
     '''
     def __init__(self,plist,machine):
+        self.plist=plist
         self.server_name=plist['name']
         self.server_welcome_string=plist['welcome']
         self.address=plist['address']
@@ -115,10 +117,11 @@ class M_A_S_S():
     '''
     def sock_tcp_establish(self, ip_addr, com):
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) ##testing.
-        #bind socket to this.
-        s.bind((ip_addr,com))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        #catch the error that "address is used."
+        s.bind((ip_addr,com))                               #bind socket to this.
         s.listen(5)  
+        
         print (self.server_name+':'+'waiting for connection...')
         return s
     
@@ -131,7 +134,18 @@ class M_A_S_S():
     '''
     def speak_to_client(self, string):
         estring=string.encode('utf-8')
-        self.sock.send(estring)
+        try:
+            self.sock.send(estring)
+        except BrokenPipeError as err:
+            print(self.server_name+': '+"Encounter BROKENPIPE!")
+            self.sock.close()
+            self.sock_thread._delete()
+
+
+    def unbound_server(self):
+        self.sock.close()
+
+
         
         
     '''
@@ -141,11 +155,15 @@ class M_A_S_S():
     Leave the socket work till an assignment is over.
     '''
     def start(self):
-        s=self.sock_tcp_establish(self.address, self.com)
-        sock,addr=s.accept()
-        self.sock=sock
-        t=threading.Thread(target=self.linque_fn,args=(sock, addr))
-        t.start()   
+
+        if not self.sock_thread.isAlive():
+            s=self.sock_tcp_establish(self.address, self.com)
+            sock,addr=s.accept()
+            self.sock=sock
+            self.sock_thread=threading.Thread(target=self.linque_fn,args=(sock, addr),name='Server'+str(self.com))
+            self.sock_thread.start()     #blocked till connection establishs
+
+
         
 
 
@@ -174,7 +192,6 @@ class transmit_env():
     
     dispatcher_MASS=[]
     
-    current_idleing_server_com=9998
     
     '''
     Connect the core pipe into this module and initialize the environment itself.
@@ -188,12 +205,11 @@ class transmit_env():
         self.core_mail_binding=core_mail
         self.cmail=mailer.mailbox('transmitter',50)
         self.init_dispatcher_MASS()
-#        self.dispatcher_MASS=M_A_S_S(dispatch_plist,self.com_dispatcher_machine)
         for pl in M_A_S_S_PLIST:
             self.MASSES.append(M_A_S_S(pl,self.machine))
         
     def init_dispatcher_MASS(self):
-        self.dispatcher_MASS=M_A_S_S(dispatch_plist,self.com_dispatcher_machine)
+        self.dispatcher_MASS=M_A_S_S(DISPATCH_PLIST,self.com_dispatcher_machine)
         
     
     '''
@@ -214,17 +230,24 @@ class transmit_env():
         if cmd=='sayhello':
             self.cmail.send(self.cmail,MASS.speak_to_client,'hello')
         elif cmd=='name':
-            self.cmail.send(self.cmail,MASS.speak_to_client,MASS.server_name)
+            self.cmail.send(self.cmail,MASS.speak_to_client,\
+                            MASS.server_name)
         elif cmd=='welcome me':
-            self.cmail.send(self.cmail,MASS.speak_to_client,MASS.server_welcome_string)
+            self.cmail.send(self.cmail,MASS.speak_to_client,\
+                            MASS.server_welcome_string)
         elif cmd=='fortune':
-            self.cmail.send(self.cmail,MASS.speak_to_client,os.popen('fortune').read())
+            self.cmail.send(self.cmail,MASS.speak_to_client,\
+                            os.popen('fortune').read())
         else:
-            self.cmail.send(self.cmail, MASS.speak_to_client,'ERROR LANG: '+cmd)  ##error: unrecognized command
+            self.cmail.send(self.cmail, MASS.speak_to_client,\
+                            'ERROR LANG: '+cmd)  ##error: unrecognized command
             
     
     '''
     Algorithm machine. Controls how the MASS works.
+    Consumes the env and the MASS. 
+    The MASS can be distributive but the mailer is unique to the env, so the
+    machine must have connection to the environment itself.
         
     MASS: the current working MASS
     '''
@@ -238,37 +261,60 @@ class transmit_env():
             Will block thread.
             '''
             data=MASS.sock.recv(1024)          
+        
+                
             time.sleep(MASS.speed)          #this sleep time is essential.
             ddata=data.decode('utf-8')
             
             if(ddata=='exit'):       #this command'd not be sent to interpreter.
                 MASS.speak_to_client('closed')
-                sock.close()         #close the sock.
+                MASS.unbound_server()        #close the sock.
+                self.init_dispatcher_MASS()
+                
                 return 0
             else:                    #push the command into the interpreter.
                 self.cmd_interpreter(ddata, MASS)
                 
             self.cmail.display_mails()
             self.cmail.read_all()    #execute all the mails.
-     
+            
+
+
+    '''
+    In need of automatic com matching, this machine must be introduced. 
+    Could be seen as the daemon of the actual algorithm machine.
+    This machine would flash out before any actual machine appears, returning
+    the address of whom the server idles. And our client would bind themselves 
+    to the idling server, then the connection can be established.
+    
+    The machine won't care for what the client prompts, it just returns the name
+    of idling server and close.
+    This should take a short time.
+    '''
     def com_dispatcher_machine(self, MASS):
         sock=MASS.sock
         print(MASS.server_name+': '+'COM_DISPATCHER_MACHINE IS RUNNING.')
         time.sleep(MASS.speed)
-        MASS.speak_to_client(str(self.current_idleing_server_com))
+        cic=str(self.current_idling_com)
+        print('DISPATCHER: DISPATCHING TO COM: '+cic)
+        MASS.speak_to_client(cic)
         return 
         
-        
+    '''
+    Start the servers sequentially. 
+    '''    
     def seq_start(self):
         def __seq_start():
+                       
             for mass in self.MASSES:
-                self.current_idleing_server_com=mass.com
-                self.init_dispatcher_MASS()
-                self.dispatcher_MASS.start()
-                mass.start()
-            while 1:
-                print("Streaming...")
-                time.sleep(2)
+                if (not mass.sock_thread.isAlive()):
+                    self.current_idling_com=mass.com
+                    self.init_dispatcher_MASS()   
+                    self.dispatcher_MASS.start()               
+                    mass.start()
+        while 1:
+            __seq_start()
+            time.sleep(2)
         __seq_start()
 
 
@@ -276,10 +322,25 @@ class transmit_env():
     
 a=transmit_env([])
 
-
+'''  
+Preserved for core module
+'''
 def __core():
     while True:
-        print('Waiting for signals ...')
+        print('')
+        print('Current working servers:')
+        isfound=False
+        for mass in a.MASSES:
+            if mass.sock_thread.isAlive():
+                print (mass.server_name)
+                isfound=True
+        if isfound==False:
+            print('None.')
+        print('')        
+        print ('Current idling servers:')
+        for mass in a.MASSES:
+            if (not mass.sock_thread.isAlive()):
+                print(mass.server_name)
         time.sleep(1)
 threading.Thread(target=a.seq_start, args=()).start()
 __core()

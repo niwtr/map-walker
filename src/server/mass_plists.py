@@ -1,4 +1,4 @@
-dispatch_plist={
+DISPATCH_PLIST={
 
     'name'    : 'DISPATCH_SERVER_COM_9999',
     'welcome' : 'Enjoy working with MASS. --9999',

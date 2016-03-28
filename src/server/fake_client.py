@@ -8,7 +8,7 @@ ds.close()
 #establish
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+print('Addr:' +str(addr))
 s.connect(('127.0.0.1',addr))
 
 print(s.recv(1024).decode('utf-8'))
@@ -21,7 +21,7 @@ def speak_to_server(s):
         print('SPEAK: ',end=''),
         dd=[]
         str=input().encode('utf-8')
-        if (str):
+        if (1):##str
             s.send(str)
             dd=s.recv(1024).decode('utf-8')
             if(dd=='closed'):
