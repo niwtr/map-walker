@@ -53,9 +53,12 @@ Happy hacking with the M_A_S_S!
 '''
 
 
-
+def sayhello():
+    print ('timer stopped!')
 class M_A_S_S():
+    
     plist=[]
+    
     sock=[]                                #the actual socket binding
         
     address='127.0.0.1'                    #ip address.
@@ -67,6 +70,12 @@ class M_A_S_S():
     speed=0.5                              #the duration for the machine to idle
     
     sock_thread=threading.Thread()
+    
+    timer=0
+    
+
+    
+
     '''
     Initialize the M_A_S_S, needs a property list and a machine.
     The property list is designed for this actual scenery, it would look like this:
@@ -80,6 +89,7 @@ class M_A_S_S():
             
         }
     
+    
     It is in fact a dictionary of Python. 
     
     Machine: an algorithm machine, which governs the receive-send cycle and 
@@ -92,6 +102,8 @@ class M_A_S_S():
         self.address=plist['address']
         self.com=plist['com']
         self.speed=plist['speed']
+        self.time_out=plist['time']
+
         self.machine=machine
     
     '''
@@ -117,11 +129,14 @@ class M_A_S_S():
     '''
     def sock_tcp_establish(self, ip_addr, com):
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(self.time_out)
+
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        #catch the error that "address is used."
+        
+        #handle the error that "address is used."
         s.bind((ip_addr,com))                               #bind socket to this.
         s.listen(5)  
-        
+
         print (self.server_name+':'+'waiting for connection...')
         return s
     
@@ -157,11 +172,21 @@ class M_A_S_S():
     def start(self):
 
         if not self.sock_thread.isAlive():
+            
             s=self.sock_tcp_establish(self.address, self.com)
-            sock,addr=s.accept()
-            self.sock=sock
-            self.sock_thread=threading.Thread(target=self.linque_fn,args=(sock, addr),name='Server'+str(self.com))
-            self.sock_thread.start()     #blocked till connection establishs
+            try:
+                sock,addr=s.accept()
+                self.sock=sock
+                self.sock_thread=threading.Thread(target=self.linque_fn,args=(sock, addr),name='Server'+str(self.com))
+                self.sock_thread.start()     #blocked till connection establishs
+                
+            except socket.timeout:
+                print(self.server_name+': '+"Connection timeout, unbound.")
+
+
+
+
+
 
 
         
@@ -254,14 +279,15 @@ class transmit_env():
 
     def machine(self,MASS):
         sock=MASS.sock
-        print (sock)
+        #print (sock)
         while True:
             '''
             Wait for the command from clients.
             Will block thread.
             '''
-            data=MASS.sock.recv(1024)          
-        
+            data=MASS.sock.recv(1024)         
+               
+               
                 
             time.sleep(MASS.speed)          #this sleep time is essential.
             ddata=data.decode('utf-8')
@@ -299,13 +325,33 @@ class transmit_env():
         print('DISPATCHER: DISPATCHING TO COM: '+cic)
         MASS.speak_to_client(cic)
         return 
+    
+    
+    def monitor_terminal(self):
+        print('')
+        print('Current working servers:')
+        isfound=False
+        for mass in self.MASSES:
+            if mass.sock_thread.isAlive():
+                print (mass.server_name)
+                isfound=True
+        if isfound==False:
+            print('None.')
+        print('')        
+        print ('Current idling servers:')
+        for mass in self.MASSES:
+            if (not mass.sock_thread.isAlive()):
+                print(mass.server_name)
+        print('')
+        
+    
+    
         
     '''
     Start the servers sequentially. 
     '''    
     def seq_start(self):
         def __seq_start():
-                       
             for mass in self.MASSES:
                 if (not mass.sock_thread.isAlive()):
                     self.current_idling_com=mass.com
@@ -327,21 +373,12 @@ Preserved for core module
 '''
 def __core():
     while True:
-        print('')
-        print('Current working servers:')
-        isfound=False
-        for mass in a.MASSES:
-            if mass.sock_thread.isAlive():
-                print (mass.server_name)
-                isfound=True
-        if isfound==False:
-            print('None.')
-        print('')        
-        print ('Current idling servers:')
-        for mass in a.MASSES:
-            if (not mass.sock_thread.isAlive()):
-                print(mass.server_name)
-        time.sleep(1)
+        os.system("clear")          #clear terminal output
+        #will only work on unix or linux.
+        a.monitor_terminal()
+        time.sleep(5)
+        
+        
 threading.Thread(target=a.seq_start, args=()).start()
 __core()
 
@@ -364,7 +401,7 @@ class transmit_logger():
     ##
     '''
     
-    def handle_transmission_error(error_code, env):
+    def handle_transmission_error(env):
         pass
 
 
