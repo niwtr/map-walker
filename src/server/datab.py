@@ -16,7 +16,7 @@ def connect_to_datab():
     path = os.getcwd()
     pparent_path = os.path.dirname(os.path.dirname(path))   #get the root dir
     # print(pparent_path)
-    sql = sqlite3.connect(pparent_path + '\data\data.db')
+    sql = sqlite3.connect(pparent_path + '/data/data.db')
     return sql
 
 '''
@@ -48,9 +48,10 @@ def datab_process_data(raw_data):
 '''
 Preserve the processed data into somewhere.
 '''
-def datab_preserve_data(data_price,data_time,data_instance):
-    list={'price':data_price,'time':data_time,'instance':data_instance}
-    return list
+def datab_preserve_data(prd):    #data_price,data_time,data_instance):
+    (data_price,data_time,data_instance)=prd
+    lis={'price':data_price,'time':data_time,'instance':data_instance}
+    return lis
 
 
 '''
@@ -62,4 +63,7 @@ def check_health():
 if(__name__ == '__main__'):
     sql = connect_to_datab()
     (raw_data_flight, raw_data_train, raw_data_bus) = datab_get_raw_data(sql)
-    datab_process_data(raw_data_flight, raw_data_train, raw_data_bus)
+    print(datab_preserve_data(datab_process_data(raw_data_flight)))
+
+        
+    #datab_process_data(raw_data_flight, raw_data_train, raw_data_bus)
