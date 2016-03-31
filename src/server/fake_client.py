@@ -1,3 +1,6 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+
 import socket
 #get the com.
 ds=socket.socket(socket.AF_INET,socket.SOCK_STREAM)

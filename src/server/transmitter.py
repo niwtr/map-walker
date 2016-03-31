@@ -1,3 +1,6 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+
 '''
 Current version : 0.2
 2016-3-26
