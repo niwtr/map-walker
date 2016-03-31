@@ -16,6 +16,8 @@ import time                                     #time official module
 import os                                       #for fortune!
 import mailer                                   #mailer module.
 
+import platform                                 #judge the platform
+
 
 #import log                                     #log module.
 
@@ -58,6 +60,7 @@ Happy hacking with the M_A_S_S!
 
 def sayhello():
     print ('timer stopped!')
+
 class M_A_S_S():
     
     plist=[]
@@ -185,14 +188,6 @@ class M_A_S_S():
                 
             except socket.timeout:
                 print(self.server_name+': '+"Connection timeout, unbound.")
-
-
-
-
-
-
-
-        
 
 
 
@@ -376,8 +371,10 @@ Preserved for core module
 '''
 def __core():
     while True:
-        os.system("clear")          #clear terminal output
-        #will only work on unix or linux.
+        if(platform.system() == 'Linux'):
+            os.system("clear")          #clear terminal output
+        elif(platform.system() == 'Windows'):
+            os.system("cls")            #clear terminal output
         a.monitor_terminal()
         time.sleep(5)
         
