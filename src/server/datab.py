@@ -1,3 +1,6 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+
 '''
 Database module.
 Get the database, convert it to the built-in data structure and hold a link

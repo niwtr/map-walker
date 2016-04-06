@@ -1,3 +1,6 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+
 '''
 Core module of server.
 The reason why I seperarted fucntions into this module is to set a conversational

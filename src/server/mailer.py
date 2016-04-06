@@ -1,3 +1,6 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+
 '''
 Mailer, a module communication protocol.
 Current version: 0.3 2016/3/22

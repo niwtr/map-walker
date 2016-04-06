@@ -1,3 +1,6 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+
 DISPATCH_PLIST={
 
     'name'    : 'DISPATCH_SERVER_COM_9999',
