@@ -16,7 +16,7 @@ def connect_to_datab():
     path = os.getcwd()
     pparent_path = os.path.dirname(os.path.dirname(path))   #get the root dir
     # print(pparent_path)
-    sql = sqlite3.connect('data.db')
+    sql = sqlite3.connect(pparent_path + '/data/data.db')
     return sql
 
 '''
@@ -38,33 +38,19 @@ Process the raw data.
 '''
 def datab_process_data(raw_data):
     data_price = [[-1 for i in range(10)] for i in range(10)]
-    data_distance = [[-1 for i in range(10)] for i in range(10)]
+    data_instance = [[-1 for i in range(10)] for i in range(10)]
     data_time = [[-1 for i in range(10)] for i in range(10)]
-    data_route=[[-1 for i in range(10)] for i in range(10)]
     for element in raw_data:
-        if data_price[int(element[3])-1][int(element[5])-1]==-1:
-            data_price[int(element[3])-1][int(element[5])-1]=element[8]
-        else:
-            data_price[int(element[3])-1][int(element[5])-1]=[data_price[int(element[3])-1][int(element[5])-1],element[8]]
-        if data_distance[int(element[3])-1][int(element[5])-1]==-1:
-            data_distance[int(element[3])-1][int(element[5])-1]=element[7]
-        else:
-            data_distance[int(element[3])-1][int(element[5])-1]=[data_distance[int(element[3])-1][int(element[5])-1],element[7]]
-        if data_time[int(element[3])-1][int(element[5])-1]==-1:
-            data_time[int(element[3])-1][int(element[5])-1]=element[6]
-        else:
-            data_time[int(element[3])-1][int(element[5])-1]=[data_time[int(element[3])-1][int(element[5])-1],element[6]]
-        if data_route[int(element[3])-1][int(element[5])-1]==-1:
-            data_route[int(element[3])-1][int(element[5])-1]=element[1]
-        else:
-            data_route[int(element[3])-1][int(element[5])-1]=[data_route[int(element[3])-1][int(element[5])-1],element[1]]
-    return (data_price,data_time,data_distance,data_route)
+        data_price[element[3]-1][element[5]-1]=element[8]
+        data_instance[element[3]-1][element[5]-1]=element[7]
+        data_time[element[3]-1][element[5]-1]=element[6]
+    return (data_price,data_time,data_instance)
 '''
 Preserve the processed data into somewhere.
 '''
 def datab_preserve_data(prd):    #data_price,data_time,data_instance):
-    (data_price,data_time,data_distance,data_route)=prd
-    lis={'price':data_price,'time':data_time,'distance':data_distance,'route':data_route}
+    (data_price,data_time,data_instance)=prd
+    lis={'price':data_price,'time':data_time,'instance':data_instance}
     return lis
 
 
@@ -77,7 +63,7 @@ def check_health():
 if(__name__ == '__main__'):
     sql = connect_to_datab()
     (raw_data_flight, raw_data_train, raw_data_bus) = datab_get_raw_data(sql)
-    print(datab_preserve_data(datab_process_data(raw_data_bus)))
+    print(datab_preserve_data(datab_process_data(raw_data_flight)))
 
         
     #datab_process_data(raw_data_flight, raw_data_train, raw_data_bus)
