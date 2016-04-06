@@ -41,14 +41,14 @@ First published: 2016-3-10
 '''
 ################################################################################
 Modularized Abstract Socket Server class.
-This is an abstration of an instant-to-use socket server. Needs a property list 
+This is an abstraction of an instant-to-use socket server. Needs a property list
 to configure and consumes a finite state machine, or cyclic procedure for inner 
 running machine. When a MASS was instantialized, it creates an abstract server
 but doesn't make any bind to the socket. And when the function start() was 
 called, the MASS would bind to the socket instantly and start working with the 
-state machine attatched. The goal of this is to create an easy-to-use abstrac-
+state machine attached. The goal of this is to create an easy-to-use abstrac-
 tion of socket server.
-In fact, the REAL MASS would not exsist. Each version of MASS is adapted to the
+In fact, the REAL MASS would not exist. Each version of MASS is adapted to the
 actual use, so does this one.
 
 
@@ -214,6 +214,8 @@ class transmit_env():
     MASSES=[]
     
     dispatcher_MASS=[]
+
+    current_idling_com = []
     
     
     '''
@@ -353,8 +355,8 @@ class transmit_env():
             for mass in self.MASSES:
                 if (not mass.sock_thread.isAlive()):
                     self.current_idling_com=mass.com
-                    self.init_dispatcher_MASS()   
-                    self.dispatcher_MASS.start()               
+                    self.init_dispatcher_MASS()
+                    self.dispatcher_MASS.start()
                     mass.start()
         while 1:
             __seq_start()
