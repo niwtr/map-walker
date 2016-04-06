@@ -19,6 +19,7 @@ def connect_to_datab():
     path = os.getcwd()
     pparent_path = os.path.dirname(os.path.dirname(path))   #get the root dir
     # print(pparent_path)
+    sql = sqlite3.connect(pparent_path + '/data/data.db')
     sql = sqlite3.connect('data.db')
     return sql
 
