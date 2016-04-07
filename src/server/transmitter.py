@@ -53,8 +53,7 @@ Happy hacking with the M_A_S_S!
 '''
 
 
-def sayhello():
-    print ('timer stopped!')
+    
 class M_A_S_S():
     
     plist=[]
@@ -156,6 +155,10 @@ class M_A_S_S():
             self.sock.close()
             self.sock_thread._delete()
 
+            
+
+
+
 
     def unbound_server(self):
         self.sock.close()
@@ -170,9 +173,7 @@ class M_A_S_S():
     Leave the socket work till an assignment is over.
     '''
     def start(self):
-
         if not self.sock_thread.isAlive():
-            
             s=self.sock_tcp_establish(self.address, self.com)
             try:
                 sock,addr=s.accept()
@@ -183,8 +184,7 @@ class M_A_S_S():
             except socket.timeout:
                 print(self.server_name+': '+"Connection timeout, unbound.")
 
-
-
+       
 
 
 
@@ -285,9 +285,10 @@ class transmit_env():
             Wait for the command from clients.
             Will block thread.
             '''
-            data=MASS.sock.recv(1024)         
-               
-               
+            try:
+                data=MASS.sock.recv(1024)         
+            except OSError:
+                print(MASS.server_name+': '+'Encounter OS ERROR!')
                 
             time.sleep(MASS.speed)          #this sleep time is essential.
             ddata=data.decode('utf-8')
@@ -301,7 +302,7 @@ class transmit_env():
             else:                    #push the command into the interpreter.
                 self.cmd_interpreter(ddata, MASS)
                 
-            self.cmail.display_mails()
+            #self.cmail.display_mails()    #for testing.
             self.cmail.read_all()    #execute all the mails.
             
 
@@ -317,6 +318,7 @@ class transmit_env():
     of idling server and close.
     This should take a short time.
     '''
+    
     def com_dispatcher_machine(self, MASS):
         sock=MASS.sock
         print(MASS.server_name+': '+'COM_DISPATCHER_MACHINE IS RUNNING.')
@@ -360,7 +362,7 @@ class transmit_env():
                     mass.start()
         while 1:
             __seq_start()
-            time.sleep(2)
+            time.sleep(1)
         __seq_start()
 
 
@@ -389,7 +391,9 @@ __core()
 
 class transmit_logger():
     
-    
+    def __init__(self, file_addr="~/map-walker/test/tr_log.log"):
+        self.file_addr=file_addr
+        self.f=open(self.file_addr, 'a')
     
     '''
     When a transmission error occured, this function would be called.
@@ -401,7 +405,7 @@ class transmit_logger():
     ##
     '''
     
-    def handle_transmission_error(env):
+    def log_transmission_error(env):
         pass
 
 
@@ -415,7 +419,10 @@ class transmit_logger():
     lcode: log code to send.
     ##
     '''
-    def send_transmit_log(message,bad_p,lcode):
-        pass
-    
-  
+    def send_transmit_log(self,message):
+        self.f.write(time.asctime()+message)
+        
+    def close_log(self):
+        self.f.close()
+
+

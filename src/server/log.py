@@ -16,7 +16,7 @@ mode=[]
 '''
 Path of the log file.
 '''
-log_path=[]
+log_path="~/map-walker/test/log.txt"
 
 
 
@@ -36,7 +36,9 @@ def make_full_log(env):
 '''
 Write log to the actual disk.
 '''
-def write_log():
+def write_log(msg):
+    with open(log_path, "a") as lf:
+        
     pass
 
 

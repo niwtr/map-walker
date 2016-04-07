@@ -224,14 +224,14 @@ class mailbox():
         mailb.get_mail(mail(self.get_mail_address(),*msg))
 
     #show all the mails in mailbox
-    def display_mails(self):
+    def display_mails(self,printf=print):
         for mail in self.maillist:
-            print ("##Mail from",mail('tag'),"with content",mail('describe'))
+            printf ("##Mail from",mail('tag'),"with content",mail('describe'))
 
     #show all the mails in history.
-    def display_histroy(self):
+    def display_histroy(self,printf=print):
         for mail in self.history:
-            print("##History mail from",mail('tag'),"with content",mail('describe'))
+            printf("##History mail from",mail('tag'),"with content",mail('describe'))
 
 
 #test examples.
