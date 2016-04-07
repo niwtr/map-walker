@@ -1,3 +1,6 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+
 '''
 Current version : 0.2
 2016-3-26
@@ -12,6 +15,8 @@ import time                                     #time official module
 
 import os                                       #for fortune!
 import mailer                                   #mailer module.
+
+import platform                                 #judge the platform
 
 
 #import log                                     #log module.
@@ -36,14 +41,14 @@ First published: 2016-3-10
 '''
 ################################################################################
 Modularized Abstract Socket Server class.
-This is an abstration of an instant-to-use socket server. Needs a property list 
+This is an abstraction of an instant-to-use socket server. Needs a property list
 to configure and consumes a finite state machine, or cyclic procedure for inner 
 running machine. When a MASS was instantialized, it creates an abstract server
 but doesn't make any bind to the socket. And when the function start() was 
 called, the MASS would bind to the socket instantly and start working with the 
-state machine attatched. The goal of this is to create an easy-to-use abstrac-
+state machine attached. The goal of this is to create an easy-to-use abstrac-
 tion of socket server.
-In fact, the REAL MASS would not exsist. Each version of MASS is adapted to the
+In fact, the REAL MASS would not exist. Each version of MASS is adapted to the
 actual use, so does this one.
 
 
@@ -53,7 +58,9 @@ Happy hacking with the M_A_S_S!
 '''
 
 
-    
+def sayhello():
+    print ('timer stopped!')
+
 class M_A_S_S():
     
     plist=[]
@@ -155,10 +162,6 @@ class M_A_S_S():
             self.sock.close()
             self.sock_thread._delete()
 
-            
-
-
-
 
     def unbound_server(self):
         self.sock.close()
@@ -173,7 +176,9 @@ class M_A_S_S():
     Leave the socket work till an assignment is over.
     '''
     def start(self):
+
         if not self.sock_thread.isAlive():
+            
             s=self.sock_tcp_establish(self.address, self.com)
             try:
                 sock,addr=s.accept()
@@ -183,13 +188,6 @@ class M_A_S_S():
                 
             except socket.timeout:
                 print(self.server_name+': '+"Connection timeout, unbound.")
-
-       
-
-
-
-
-        
 
 
 
@@ -216,6 +214,8 @@ class transmit_env():
     MASSES=[]
     
     dispatcher_MASS=[]
+
+    current_idling_com = []
     
     
     '''
@@ -285,10 +285,9 @@ class transmit_env():
             Wait for the command from clients.
             Will block thread.
             '''
-            try:
-                data=MASS.sock.recv(1024)         
-            except OSError:
-                print(MASS.server_name+': '+'Encounter OS ERROR!')
+            data=MASS.sock.recv(1024)         
+               
+               
                 
             time.sleep(MASS.speed)          #this sleep time is essential.
             ddata=data.decode('utf-8')
@@ -302,7 +301,7 @@ class transmit_env():
             else:                    #push the command into the interpreter.
                 self.cmd_interpreter(ddata, MASS)
                 
-            #self.cmail.display_mails()    #for testing.
+            self.cmail.display_mails()
             self.cmail.read_all()    #execute all the mails.
             
 
@@ -318,7 +317,6 @@ class transmit_env():
     of idling server and close.
     This should take a short time.
     '''
-    
     def com_dispatcher_machine(self, MASS):
         sock=MASS.sock
         print(MASS.server_name+': '+'COM_DISPATCHER_MACHINE IS RUNNING.')
@@ -357,12 +355,12 @@ class transmit_env():
             for mass in self.MASSES:
                 if (not mass.sock_thread.isAlive()):
                     self.current_idling_com=mass.com
-                    self.init_dispatcher_MASS()   
-                    self.dispatcher_MASS.start()               
+                    self.init_dispatcher_MASS()
+                    self.dispatcher_MASS.start()
                     mass.start()
         while 1:
             __seq_start()
-            time.sleep(1)
+            time.sleep(2)
         __seq_start()
 
 
@@ -375,8 +373,10 @@ Preserved for core module
 '''
 def __core():
     while True:
-        os.system("clear")          #clear terminal output
-        #will only work on unix or linux.
+        if(platform.system() == 'Linux'):
+            os.system("clear")          #clear terminal output
+        elif(platform.system() == 'Windows'):
+            os.system("cls")            #clear terminal output
         a.monitor_terminal()
         time.sleep(5)
         
@@ -391,9 +391,7 @@ __core()
 
 class transmit_logger():
     
-    def __init__(self, file_addr="~/map-walker/test/tr_log.log"):
-        self.file_addr=file_addr
-        self.f=open(self.file_addr, 'a')
+    
     
     '''
     When a transmission error occured, this function would be called.
@@ -405,7 +403,7 @@ class transmit_logger():
     ##
     '''
     
-    def log_transmission_error(env):
+    def handle_transmission_error(env):
         pass
 
 
@@ -419,10 +417,7 @@ class transmit_logger():
     lcode: log code to send.
     ##
     '''
-    def send_transmit_log(self,message):
-        self.f.write(time.asctime()+message)
-        
-    def close_log(self):
-        self.f.close()
-
-
+    def send_transmit_log(message,bad_p,lcode):
+        pass
+    
+  
