@@ -40,8 +40,6 @@ def make_full_log(env):
 Write log to the actual disk.
 '''
 def write_log(msg):
-    with open(log_path, "a") as lf:
-        
     pass
 
 

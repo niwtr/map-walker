@@ -46,20 +46,24 @@ def datab_process_data(raw_data):
     for element in raw_data:
         if data_price[int(element[3])-1][int(element[5])-1]==-1:
             data_price[int(element[3])-1][int(element[5])-1]=element[8]
-        else:
-            data_price[int(element[3])-1][int(element[5])-1]=[data_price[int(element[3])-1][int(element[5])-1],element[8]]
+            data_price[int(element[5])-1][int(element[3])-1]=element[8]
+        # else:
+        #     data_price[int(element[3])-1][int(element[5])-1]=[data_price[int(element[3])-1][int(element[5])-1],element[8]]
         if data_distance[int(element[3])-1][int(element[5])-1]==-1:
             data_distance[int(element[3])-1][int(element[5])-1]=element[7]
-        else:
-            data_distance[int(element[3])-1][int(element[5])-1]=[data_distance[int(element[3])-1][int(element[5])-1],element[7]]
+            data_distance[int(element[5])-1][int(element[3])-1]=element[7]
+        # else:
+        #     data_distance[int(element[3])-1][int(element[5])-1]=[data_distance[int(element[3])-1][int(element[5])-1],element[7]]
         if data_time[int(element[3])-1][int(element[5])-1]==-1:
             data_time[int(element[3])-1][int(element[5])-1]=element[6]
-        else:
-            data_time[int(element[3])-1][int(element[5])-1]=[data_time[int(element[3])-1][int(element[5])-1],element[6]]
+            data_time[int(element[5])-1][int(element[3])-1]=element[6]
+        # else:
+        #     data_time[int(element[3])-1][int(element[5])-1]=[data_time[int(element[3])-1][int(element[5])-1],element[6]]
         if data_route[int(element[3])-1][int(element[5])-1]==-1:
             data_route[int(element[3])-1][int(element[5])-1]=element[1]
-        else:
-            data_route[int(element[3])-1][int(element[5])-1]=[data_route[int(element[3])-1][int(element[5])-1],element[1]]
+            data_route[int(element[5])-1][int(element[3])-1]=element[1]
+        # else:
+        #     data_route[int(element[3])-1][int(element[5])-1]=[data_route[int(element[3])-1][int(element[5])-1],element[1]]
     lis = {'price': data_price,'time': data_time, 'distance': data_distance, 'route': data_route}
     return lis
 
@@ -94,6 +98,6 @@ if(__name__ == '__main__'):
     data_bus = datab_process_data(raw_data_bus)
     data_all = datab_mix_all(data_flight, data_train, data_bus)   #the final data
     data_name = datab_get_name(raw_data_train)  #station_name
-    # for element in data_all['train']['time']:
-    #     print(element)
-    print(data_name)
+    for element in data_all['train']['time']:
+        print(element)
+    # print(data_name)
