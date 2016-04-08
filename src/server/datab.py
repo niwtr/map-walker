@@ -39,31 +39,31 @@ def datab_get_raw_data(sql):
 Process the raw data.
 '''
 def datab_process_data(raw_data):
-    data_price = [[-1 for i in range(10)] for i in range(10)]
-    data_distance = [[-1 for i in range(10)] for i in range(10)]
-    data_time = [[-1 for i in range(10)] for i in range(10)]
-    data_route = [[-1 for i in range(10)] for i in range(10)]
+    data_price = [[[] for i in range(10)] for i in range(10)]
+    data_distance = [[[] for i in range(10)] for i in range(10)]
+    data_time = [[[] for i in range(10)] for i in range(10)]
+    data_route = [[[] for i in range(10)] for i in range(10)]
     for element in raw_data:
-        if data_price[int(element[3])-1][int(element[5])-1]==-1:
-            data_price[int(element[3])-1][int(element[5])-1]=element[8]
-            data_price[int(element[5])-1][int(element[3])-1]=element[8]
-        # else:
-        #     data_price[int(element[3])-1][int(element[5])-1]=[data_price[int(element[3])-1][int(element[5])-1],element[8]]
-        if data_distance[int(element[3])-1][int(element[5])-1]==-1:
-            data_distance[int(element[3])-1][int(element[5])-1]=element[7]
-            data_distance[int(element[5])-1][int(element[3])-1]=element[7]
-        # else:
-        #     data_distance[int(element[3])-1][int(element[5])-1]=[data_distance[int(element[3])-1][int(element[5])-1],element[7]]
-        if data_time[int(element[3])-1][int(element[5])-1]==-1:
-            data_time[int(element[3])-1][int(element[5])-1]=element[6]
-            data_time[int(element[5])-1][int(element[3])-1]=element[6]
-        # else:
-        #     data_time[int(element[3])-1][int(element[5])-1]=[data_time[int(element[3])-1][int(element[5])-1],element[6]]
-        if data_route[int(element[3])-1][int(element[5])-1]==-1:
-            data_route[int(element[3])-1][int(element[5])-1]=element[1]
-            data_route[int(element[5])-1][int(element[3])-1]=element[1]
-        # else:
-        #     data_route[int(element[3])-1][int(element[5])-1]=[data_route[int(element[3])-1][int(element[5])-1],element[1]]
+        data_price[int(element[3])-1][int(element[5])-1].append(element[8])
+        data_price[int(element[5])-1][int(element[3])-1].append(element[8])
+
+        data_distance[int(element[3])-1][int(element[5])-1].append(element[7])
+        data_distance[int(element[5])-1][int(element[3])-1].append(element[7])
+
+        #convert time format to integer
+        temp_int = 0
+        temp_string = element[6]
+        if(temp_string.find('h') != -1):
+            temp_int += int(temp_string.split('h')[0]) * 60
+            temp_string = temp_string.split('h')[1]
+        if(temp_string.find('m') != -1):
+            temp_int += int(temp_string.split('m')[0])
+
+        data_time[int(element[3])-1][int(element[5])-1].append(temp_int)
+        data_time[int(element[5])-1][int(element[3])-1].append(temp_int)
+
+        data_route[int(element[3])-1][int(element[5])-1].append(element[1])
+        data_route[int(element[5])-1][int(element[3])-1].append(element[1])
     lis = {'price': data_price,'time': data_time, 'distance': data_distance, 'route': data_route}
     return lis
 
@@ -100,4 +100,4 @@ if(__name__ == '__main__'):
     data_name = datab_get_name(raw_data_train)  #station_name
     for element in data_all['train']['time']:
         print(element)
-    # print(data_name)
+    print(data_name)
