@@ -20,16 +20,9 @@ from mailer import mailbox
 import platform                                 #judge the platform
 
 
-#import log                                     #log module.
-
-
 from mass_plists import M_A_S_S_PLIST           #property list for MASSES
 from mass_plists import DISPATCH_PLIST
-
-
-
-
-
+from log import log_file                        #log object
 '''
 ################################################################################
                                    M_A_S_S

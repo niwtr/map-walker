@@ -6,11 +6,11 @@ Database module.
 Get the database, convert it to the built-in data structure and hold a link
 to it. The module should be initialized before any other modules except mailer
 and log.
-Design: Heranort
+Design: Heranort, L.Laddie
 '''
 
 import sqlite3, os
-
+from log import log_file
 
 '''
 Connect to the database.
@@ -18,8 +18,9 @@ Connect to the database.
 def connect_to_datab():
     path = os.getcwd()
     pparent_path = os.path.dirname(os.path.dirname(path))   #get the root dir
-    # print(pparent_path)
-    sql = sqlite3.connect(pparent_path + '/data/data.db')
+    data_path = os.path.join(pparent_path, 'data', 'data.db')
+    sql = sqlite3.connect(data_path)
+    log_file.info('database connected from %s', data_path)   #write to the log file
     return sql
 
 '''
@@ -82,6 +83,7 @@ Mix all the different transportation to one data list
 '''
 def datab_mix_all(data_flight, data_train, data_bus):
     data_all = {'flight': data_flight, 'train': data_train, 'bus': data_bus}
+    log_file.info('database successfully possessed')
     return data_all
 
 '''

@@ -22,6 +22,7 @@ from datab import database_binding
 from router import router_module
 from transmitter import transmit_env
 from transmitter import transmitter_packet
+from log import log_file
 
 
 

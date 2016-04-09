@@ -5,12 +5,14 @@ to clients, via the transmitter module.
 
 Three strategies are required:
  1. minimal cost
- 2. minimal timep
- 3. minimsl cost in a limited time.
+ 2. minimal time
+ 3. minimal cost in a limited time.
 
 The path calculated already must be stored somewhere to suppor the tracer module.
 
+RUN OTTA TIME, SEE YOU TOMMORROW.
 
+Design: Heranort, L.Laddie
 '''
 
 import mailer
@@ -18,6 +20,7 @@ import log
 #import datab
 from datab import database_binding
 import copy
+from log import log_file
 
 
 
