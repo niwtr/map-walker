@@ -5,7 +5,7 @@
 Log module.
 
 Maintains the mechanism to write log.
-Design: Heranort
+Design: Heranort, L.Laddie
 '''
 
 import os, time, shutil
@@ -97,8 +97,9 @@ class Log_file():
     def warn(self, fmt, *msg):
         self.write_log('WARN', fmt, *msg)
 
+log_file = Log_file()
+
 if(__name__ == '__main__'):
-    log_file = Log_file()
     log_file.debug('test')
     log_file.debug('%d*%s', 272, 'test')
     log_file.info('%d*%s', 1954, 'test')

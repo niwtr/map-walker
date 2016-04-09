@@ -16,7 +16,7 @@ and implementation, before your start of programming.
 Design: Heranort
 '''
 import mailer
-
+from log import log_file
 
 
 
