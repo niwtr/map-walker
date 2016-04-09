@@ -90,7 +90,38 @@ Check wether the history is modified. If so, emit warning.
 def check_health():
     pass
 
+
+def init_database():
+    sql = connect_to_datab()
+    (raw_data_flight, raw_data_train, raw_data_bus) = datab_get_raw_data(sql)
+    data_flight = datab_process_data(raw_data_flight)
+    data_train = datab_process_data(raw_data_train)
+    data_bus = datab_process_data(raw_data_bus)
+    data_all = datab_mix_all(data_flight, data_train, data_bus)   #the final data
+    data_name = datab_get_name(raw_data_train)  #station_name    
+
+class database_binding():
+    sql=[]
+    raw_data_flight=raw_data_train=raw_data_bus=[]
+    data_flight=[]
+    data_train=[]
+    data_bus=[]
+    data_all=[]
+    data_name=[]
+    def __init__(self):
+        self.sql = connect_to_datab()
+        (self.raw_data_flight, self.raw_data_train, self.raw_data_bus) = datab_get_raw_data(self.sql)
+        self.data_flight = datab_process_data(self.raw_data_flight)
+        self.data_train = datab_process_data(self.raw_data_train)
+        self.data_bus = datab_process_data(self.raw_data_bus)
+        self.data_all = datab_mix_all(self.data_flight, self.data_train, self.data_bus)   #the final data
+        self.data_name = datab_get_name(self.raw_data_train)  #station_name    
+        
+
+
 if(__name__ == '__main__'):
+    pass
+    '''
     sql = connect_to_datab()
     (raw_data_flight, raw_data_train, raw_data_bus) = datab_get_raw_data(sql)
     data_flight = datab_process_data(raw_data_flight)
@@ -98,6 +129,5 @@ if(__name__ == '__main__'):
     data_bus = datab_process_data(raw_data_bus)
     data_all = datab_mix_all(data_flight, data_train, data_bus)   #the final data
     data_name = datab_get_name(raw_data_train)  #station_name
-    for element in data_all['train']['time']:
-        print(element)
-    print(data_name)
+    '''
+ 

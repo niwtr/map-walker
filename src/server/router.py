@@ -10,27 +10,21 @@ Three strategies are required:
 
 The path calculated already must be stored somewhere to suppor the tracer module.
 
-RUN OTTA TIME, SEE YOU TOMMORROW.
+
 '''
 
 import mailer
 import log
-import datab
+#import datab
+from datab import database_binding
 import copy
 
 
-cmail=[]
 
 
 
-'''
-Initialize the router module, including initializing the mailer, ensuring conne-
-ction to the data base, checking the health of connection between core, and est-
-ablishing user history.
-'''
 
-def init_router():
-    pass
+
 
 
 '''
@@ -41,15 +35,13 @@ The history maybe used twice for reference of path recommendation.
 def emit_to_history(route):
     pass
 
-'''
-Mail the path to core module.
-'''
-def mailing_path_to_core(route):
-    pass
+
 
 '''
+################################################################################
 This algorithm can use mode to select different minimal ways.
 For example: minimal_path(data_all, 0, [1, 5, 9], 'price')
+################################################################################
 '''
 def minimal_path(datab_link, source, destination, mode):
     dat_flight = datab_link['flight'][mode]
@@ -119,10 +111,53 @@ def minimal_path(datab_link, source, destination, mode):
     path[k].append([k, -1])  #add the last arrive city
     return (path[k], dis[k])
 
+
 def minimal_cost_restricted(datab_link, source,destination):
+    
     pass
 
+
+
+
+
+'''
+################################################################################
+Work as interface toward the core module.
+Exporting route_calculating functions used by core.
+Does not contian a mailbox.
+################################################################################
+'''
+
+class router_module():  
+    data_all=[]
+    '''
+    Initialize the router module, including initializing the mailer, ensuring conne-
+    ction to the data base, checking the health of connection between core, and est-
+    ablishing user history.
+    '''    
+    def __init__(self, core_mail_binding, database_binding):
+        self.data_all=database_binding.data_all
+        
+
+    def minimal_cost_path(self,id_src, id_dest):
+        return minimal_path(self.data_all, id_src,id_dest, 'price')
+
+    
+    def minimal_time_path(self, id_src, id_dest):
+        return minimal_path(self.data_all, id_src, id_dest, 'time')
+
+        
+    
+    
+    
+    
+    
 if(__name__ == '__main__'):
+
+    pass
+
+
+    '''
     sql = datab.connect_to_datab()
     (raw_data_flight, raw_data_train, raw_data_bus) = datab.datab_get_raw_data(sql)
     data_flight = datab.datab_process_data(raw_data_flight)
@@ -130,10 +165,12 @@ if(__name__ == '__main__'):
     data_bus = datab.datab_process_data(raw_data_bus)
     data_all = datab.datab_mix_all(data_flight, data_train, data_bus)   #the final data
     data_name = datab.datab_get_name(raw_data_flight)
-
+    
+    database=database_binding()
     (path_cost, min_cost) = minimal_path(data_all, 0, [9, 2, 1, 6], 'price')
-    (path_time, min_time) = minimal_path(data_all, 0, [1, 2, 6, 9], 'time')
 
+    (path_time, min_time) = minimal_path(data_all, 0, [1, 2, 6, 9], 'time')
+    
     def print_path(data_path, data_name):
         for element in data_path:
             print(data_name[element[0]], end=' ')
@@ -143,8 +180,11 @@ if(__name__ == '__main__'):
                 print('-火车->', end=' ')
             elif(element[1] == 2):
                 print('-汽车->', end=' ')
+                
 
     print_path(path_cost, data_name)
     print(min_cost)
     print_path(path_time, data_name)
     print(min_time)
+    '''
+    

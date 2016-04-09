@@ -141,15 +141,17 @@ Design: Heranort
 class mailbox():
     
     
-    maillist=[]             #container of mails
+#    maillist             #container of mails
     
-    history=[]              #container of histories
+#    history              #container of histories
     
-    history_len=10          #maximum length of history container
+#    history_len        #maximum length of history container
     
-    mail_address=""         #tag of the mailbox, can be showed in mails
+#    mail_address        #tag of the mailbox, can be showed in mails
     
     def __init__(self, mail_address, history_len=10):
+        self.maillist=[]
+        self.history=[]
         self.mail_address=mail_address
         self.history_len=history_len
         
@@ -160,6 +162,9 @@ class mailbox():
     def read(self, arg=0):
         if(len(self.maillist)!=0):
             return self.maillist.pop(0)(arg)
+    
+    
+
         
     #read and preserve in history.       
     def pread(self, arg=0):
@@ -177,10 +182,10 @@ class mailbox():
         if(len(self.history)!=0):
             return self.history.pop(0)(arg)
 
-    #read and mark it as new.        
+    #return the mail.
     def check(self, arg=0):
-        if(len(self.maillist)!=0):
-            return self.maillist[0](arg)
+        return self.maillist[0]
+        
     
     #delete the mail.        
     def trash(self):
@@ -219,13 +224,14 @@ class mailbox():
         self.maillist.clear()
         return retv
         
-    def get_mail(self,msg):    
+    def get_mail(self,msg):
         self.maillist.append(msg)
 
     #send mails to other mailbox
-    def send(self,mailb,*msg):
+    def send(self, mailb, *msg):
         mailb.get_mail(mail(self.get_mail_address(),*msg))
 
+        
     #show all the mails in mailbox
     def display_mails(self,printf=print):
         for mail in self.maillist:

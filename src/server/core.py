@@ -15,10 +15,13 @@ and implementation, before your start of programming.
 
 Design: Heranort
 '''
+import threading
+import time
 import mailer
-
-
-
+from datab import database_binding
+from router import router_module
+from transmitter import transmit_env
+from transmitter import transmitter_packet
 
 
 
@@ -29,49 +32,78 @@ cmail: mailbox of this module.
 permitted_fn: only permitted functions are callable, aka, controllable by outside modules.
 ##
 
-
-
 '''
+
+
+
+
+
+
+
+
 class core_domain():
     
-    cmail=[]                    #mailer of core environment.
+    router=[]
+    
+    database=[]
+    
+    transmitter=[]
 
     permitted_fn=[]             #permitted functions.
     
-    def __init__():
+    def __init__(self):
         pass
+        
+        
 
-    def initialize_env():       #initialize the environment.
-        pass
+    def initialize_env(self):       #initialize the environment.
+        
+        '''INIT CORE MAILBOX'''
+        self.cmail=mailer.mailbox('core',50)
+        '''INIT DATABASE'''
+        self.database=database_binding()
+        '''INIT ROUTER MODULE'''
+        self.router=router_module(self.cmail, self.database)        
+        '''INIT TRANSMITTER ENVIRONMENT'''
+        self.transmitter=transmit_env(self.cmail)
+        
+        '''TRANSMITTER MAILBOX'''
+        self.tr_mailbox=self.transmitter.tmail
+
+
+
     
-    def proc_idle():            #idle procedure
-        pass
+    def start_transmitter(self): #procedure for controling transmitter module
+        threading.Thread(target=self.transmitter.seq_start, args=()).start()
     
-    def proc_ctl_router():      #procedure for controling router module
-        pass
+    '''interprete the request command into actual functions'''
+    def command_interpreter(self,cmd):
+        if cmd=='mtp':
+            return self.router.minimal_time_path
+        elif cmd=='mcp':
+            return self.router.minimal_cost_path
+
     
-    def proc_ctl_tracer():      #procedure for controling tracer module
-        pass
+    def run(self):
+        while True:
+            pkt=self.cmail.read()
+            if isinstance(pkt, transmitter_packet):
+                result=self.command_interpreter(pkt.req)(*pkt.args)
+                self.cmail.send(self.tr_mailbox, pkt.pipe, str(result))
+
     
-    def proc_ctl_transmitter(): #procedure for controling transmitter module
-        pass
-    
-    def proc_ctl_datab():       #procedure for controling database module.
-        pass
-    
-    def run():                  #run state mathine
-        pass
-    
+           
+
     def shut_down():            #write the log and shut down the state machine
         pass
     
 
 
 
-
-
-
-
+cd=core_domain()
+cd.initialize_env()
+cd.start_transmitter()
+cd.run()
 
 
 
