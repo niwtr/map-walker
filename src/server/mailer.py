@@ -177,6 +177,21 @@ class mailbox():
         else: 
             pass
         
+    def pread_all(self, args=[]):
+        retv=[]
+        for mail in self.maillist:
+            if(len(self.history)>self.history_len):
+                self.history.pop(0)
+            self.history.append(mail)
+            if(args!=[]):
+                retv.append(mail(args.pop(0)))
+            else: 
+                retv.append(mail())
+        self.maillist.clear()
+        return retv
+
+    
+    
     #read the first history.    
     def read_again(self, arg=0):
         if(len(self.history)!=0):
@@ -242,6 +257,11 @@ class mailbox():
         for mail in self.history:
             printf("##History mail from",mail('tag'),"with content",mail('describe'))
 
+    def get_all_mails(self):
+        return self.maillist
+    
+    def get_all_histories(self):
+        return self.history
 
 #test examples.
 '''

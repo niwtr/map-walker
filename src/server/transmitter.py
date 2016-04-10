@@ -285,7 +285,15 @@ class transmit_env():
         args=tuple(eval(cmd[1]))   #the argument list, tupled
         pkt=transmitter_packet(MASS,command,args)   #pack up the message.
         return pkt
-
+    
+    def shutdown_MASS(self, com):
+        isFound=False
+        for mass in self.MASSES:
+            if mass.com==com:
+                if mass.sock_thread.isAlive():
+                    mass.unbound_server()
+                isFound=True
+        return isFound
 
     '''
     Algorithm machine. Controls how the MASS works.
@@ -351,8 +359,8 @@ class transmit_env():
                 wait_for_event()
                 
 
-            self.tmail.display_mails()
-            self.tmail.read_all()           #execute all the mails.
+#            self.tmail.display_mails()
+            self.tmail.pread_all()           #execute all the mails.
 
 
 
@@ -377,22 +385,38 @@ class transmit_env():
         return 
 
 
-    def monitor_terminal(self):
-        print('')
-        print('Current working servers:')
-        isfound=False
+    def get_server_status(self):
+        idling=[]
+        working=[]
         for mass in self.MASSES:
             if mass.sock_thread.isAlive():
-                print (mass.server_name)
-                isfound=True
-        if isfound==False:
-            print('None.')
-        print('')        
-        print ('Current idling servers:')
-        for mass in self.MASSES:
-            if (not mass.sock_thread.isAlive()):
-                print(mass.server_name)
+                working.append(mass.server_name)
+            else:
+                idling.append(mass.server_name)
+                
+        return {
+                  'idling'  : idling,
+                  'working' : working
+                }
+                
+    def server_monitor(self):
+        servs=self.get_server_status()
+        ids=servs['idling']
+        wds=servs['working']
+        print('Current idling servers:')
+        if ids==[]:
+            print('None')
+        else:
+            for i in ids :
+                print(i)
         print('')
+        print('Current working servers:')
+        if wds==[]:
+            print('None')
+        else: 
+            for i in wds:
+                print(i)
+                
 
 
 
