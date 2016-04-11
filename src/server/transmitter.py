@@ -7,7 +7,7 @@ Current version : 0.3
 by Heranort 
 '''
 
-
+def print(*c, end=''):pass #quiet!!!
 
 import threading                                #for thread creation
 import socket                                   #socket offical module
@@ -18,7 +18,7 @@ import os                                       #for fortune!
 from mailer import mail
 from mailer import mailbox
 import platform                                 #judge the platform
-
+import sys
 
 from mass_plists import M_A_S_S_PLIST           #property list for MASSES
 from mass_plists import DISPATCH_PLIST
@@ -117,6 +117,7 @@ class M_A_S_S():
     '''
 
     def linque_fn (self, sock, addr):
+        
         print(self.server_name+':'+'Accept new connection from %s:%s...' % addr)
         sock.send(b'established')                   #connection acknowledge.
         self.machine(self)
@@ -231,7 +232,6 @@ class transmit_env():
 
     current_idling_com = []
     
-    
 
     '''
     Connect the core pipe into this module and initialize the environment itself.
@@ -292,6 +292,7 @@ class transmit_env():
             if mass.com==com:
                 if mass.sock_thread.isAlive():
                     mass.unbound_server()
+                    self.init_dispatcher_MASS()                                        
                 isFound=True
         return isFound
 
@@ -341,11 +342,18 @@ class transmit_env():
             Wait for the command from clients.
             Will block thread.
             '''
+	    
+            try: 
+                data=MASS.sock.recv(1024)         
+		
+            except OSError:
+                break                       #Broken pipe, server shutted down 
 
-            data=MASS.sock.recv(1024)         
+		
             time.sleep(MASS.speed)          #this sleep time is essential.
 
             ddata=data.decode('utf-8')
+
 
             if(ddata=='exit'):              #this command'd not be sent to interpreter.
                 MASS.speak_to_client('closed')
@@ -356,10 +364,10 @@ class transmit_env():
                 pkt=self.cmd_evaluator(ddata, MASS)
                 self.tmail.send(self.cmail, lambda x:x, pkt)  
                                             #send the function prompt to the core.
-                wait_for_event()
+                wait_for_event()            #wait for the respond of the core.
                 
 
-#            self.tmail.display_mails()
+
             self.tmail.pread_all()           #execute all the mails.
 
 
@@ -399,27 +407,9 @@ class transmit_env():
                   'working' : working
                 }
                 
-    def server_monitor(self):
-        servs=self.get_server_status()
-        ids=servs['idling']
-        wds=servs['working']
-        print('Current idling servers:')
-        if ids==[]:
-            print('None')
-        else:
-            for i in ids :
-                print(i)
-        print('')
-        print('Current working servers:')
-        if wds==[]:
-            print('None')
-        else: 
-            for i in wds:
-                print(i)
-                
-
-
-
+ 
+        
+            
 
     '''
     Start the servers sequentially. 
@@ -438,6 +428,7 @@ class transmit_env():
         __seq_start()
 
 
+    
 
 
 

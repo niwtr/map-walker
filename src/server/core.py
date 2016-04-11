@@ -32,12 +32,13 @@ import os
 
 
 '''
+################################################################################
 Environment of the core finite state machine.
 ##
 cmail: mailbox of this module.
 permitted_fn: only permitted functions are callable, aka, controllable by outside modules.
 ##
-
+################################################################################
 '''
 
 
@@ -86,36 +87,84 @@ class core_domain():
         threading.Thread(target=self.core_machine, args=()).start()
 
 
-    def mail_interface(self, mail_box):
-        prinl('-')
-        print('Mailbox '+str(mail_box))
-        prinl('-')
+    def shut_down(self):            #write the log and shut down the state machine
+        pass
+
+
+
+'''
+################################################################################
+Provides terminal interface for users.
+This is non-necessary for server administrator. 
+The monitor procedure is seperated from the core to keep the core clean and #.
+################################################################################
+'''
+
+class shelled_core(core_domain):
+    
+    def __init__(self):
+        self.tty_rows, self.tty_columns = os.popen('stty size', 'r').read().split()            
+        self.tty_rows=int(self.tty_rows)
+        self.tty_columns=int(self.tty_columns)	        
+
         
+    
+    def init_core(self):
+        self.initialize_env()
+        self.start_transmitter()
+        self.run()
+        return self
+    
+    
+    def prinl(self,c):
+        for i in range(0, self.tty_columns):
+            print(c,end='')    
+        
+    
+    def mail_interface(self, mail_box):
+        self.prinl('-')
+        print('Mailbox '+str(mail_box))
+        self.prinl('-')
+        count=1
         for mail in mail_box.history:
-            print('Mail from ',mail('tag'),'with content ',mail('describe'))
+            print(str(count)+': '+'Mail from ',mail('tag'),'with content ',mail('describe'))
             
-        prinl('*')
+        self.prinl('*')
         print('Press o to return to main interface.')
 
     def main_interface(self):
-        prinl('-')
+        self.prinl('-')
         print('Main interface.')
-        prinl('-') 
+        self.prinl('-') 
         print('Press m for server monitor')
         print('Press k to kill a server')
         print('Press q or <esc> to quit')
         print('Press t to check transmitter mailbox history')
         print('Press c to check core mailbox history')
 
-
-        
-    command_usage_string='''
-    shutdown <com> := Shutdown the server of com <com>
-
-    '''
-
-    
-
+    def server_monitor(self):
+        servs=self.transmitter.get_server_status()
+        ids=servs['idling']
+        wds=servs['working']
+        print('Current idling servers:')
+        if ids==[]:
+            print('None')
+        else:
+            for i in ids :
+                print(i)
+        print('')
+        print('Current working servers:')
+        if wds==[]:
+            print('None')
+        else: 
+            for i in wds:
+                print(i)
+        print('')
+        print('Dispatcher: ',end='')
+        if self.transmitter.dispatcher_MASS.sock_thread.isAlive():
+            print('BUSY')
+        else: 
+            print('IDLE')
 
     def monitor(self):
 
@@ -126,20 +175,20 @@ class core_domain():
 
         while True:
             sys.stdout.flush()
-            time.sleep(0.5)
+            time.sleep(0.1)
             os.system("clear")
 
             if status=='main': 
                 self.main_interface()
                 
             elif status=='server monitor':
-                prinl('-')
+                self.prinl('-')
                 print('Server monitor.')
-                prinl('-')
-                self.transmitter.server_monitor()
-                prinl('-')
+                self.prinl('-')
+                self.server_monitor()
+                self.prinl('-')
                 print('Pass o to return to main interface.')
-                prinl('-')
+                self.prinl('-')
                  
                 
             elif status=='kill':
@@ -162,8 +211,12 @@ class core_domain():
             if select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []):
                 c = sys.stdin.read(1)
                 if c == '\x1b' or c=='q': 
+                    #restore old tty setting
+                    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+                    self.shut_down()        #currently no work.
+                    os._exit(0)             #shutdown completely.                    
                     print('bye.')
-                    break#break #currently cannot quit neatly.
+                    break
 
                 elif c=='k': status='kill'
 
@@ -176,40 +229,14 @@ class core_domain():
                 elif c=='c': status='cmail'
 
 
-
-
-
-
         #restore old tty setting
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-        exit()
-
-
-
-    def shut_down():            #write the log and shut down the state machine
-        pass
-
-
-
-
+        
+        os._exit(0)             #shutdown completely.
 
     
-tty_rows, tty_columns = os.popen('stty size', 'r').read().split()            
-tty_rows=int(tty_rows)
-tty_columns=int(tty_columns)	
-
-def prinl(c):
-    for i in range(0, tty_columns):
-        print(c,end='')    
-
-cd=core_domain()
-cd.initialize_env()
-cd.start_transmitter()
-cd.run()
-#able to work without monitor.
-cd.monitor()
 
 
 
-
-
+if __name__=='__main__':
+    shelled_core().init_core().monitor()
