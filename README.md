@@ -1,16 +1,16 @@
-# map-walker, the ultimate solution to integrated path-guiding software
+# Map-Walker, the ultimate solution to integrated path-guiding software
 
 ## Acknowledges
 This is the repository for Data Structure assignments of a BUPT team.
 Current developer:
 
-Tianrui Niu
+Tianrui Niu the mechanism designer, vital developer
 Contact: heranort@163.com
 
-Han Liu
+Han Liu the algol implementor, vital developer
 Contact: liuhan132@foxmail.com
 
-Mo Ying
+Mo Ying the algorithm implementor, vital developer
 Contact: 1456415911@qq.com
 
 ## Current development process
@@ -27,8 +27,33 @@ Second developers’ meeting, finished requirement analysis, pushing the develop
 2016-3-7
 Decision of using Python 2.7 has been changed to using Python 3.4. Keeping sharp & new is far better than staying outdated.
 
+2016-3-10
+The original design of transmitter module.
 
+2016-3-20
+Finished data designing, Including three means of transportation, 10 cities and hundreds of direct paths.
 
+2016-3-21
+Introducing mailer, the main machanism for module communication.
+More in the code!
+
+2016-3-21 
+Mailer upgraded to version 0.3, the first ready-to-use version of mailer mechanism.
+
+2016-3-23
+Finished designation of all modules.
+
+2016-3-28
+Upgrading database managing module. The interface to sql server.
+
+2016-3-29 
+Finished the first ready—to-use transmitter module, including MASS (Modularized Abstract Socket Server), version 0.23
+
+2016-4-7 
+Added core algorithm of minimal-cost.
+
+2016-4-9
+Added core module. It serves as the main interface to the whole software. The Map-Walker is now usable!
 
 
 
