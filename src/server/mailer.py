@@ -164,7 +164,8 @@ class mailbox():
             return self.maillist.pop(0)(arg)
     
     
-
+    def clearp(self):
+        return len(self.maillist)==0
         
     #read and preserve in history.       
     def pread(self, arg=0):
@@ -197,9 +198,12 @@ class mailbox():
         if(len(self.history)!=0):
             return self.history.pop(0)(arg)
 
-    #return the mail.
+    #simply excurte the mail.
     def check(self, arg=0):
-        return self.maillist[0]
+        if not self.clearp():
+            return self.maillist[0](arg)
+        else : 
+            return 'nil'
         
     
     #delete the mail.        

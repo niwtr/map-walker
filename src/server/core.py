@@ -52,7 +52,7 @@ class core_domain():
 
 
     def initialize_env(self):       #initialize the environment.
-
+        self.core_machine_status='accept-all'
         '''INIT CORE MAILBOX'''
         self.cmail=mailer.mailbox('core',50)
         '''INIT DATABASE'''
@@ -75,16 +75,34 @@ class core_domain():
             return self.router.minimal_time_path
         elif cmd=='mcp':
             return self.router.minimal_cost_path
-
+        
+        
+    def transmit_back(self):
+        pkt=self.cmail.pread()
+        if isinstance(pkt, transmitter_packet):
+            result=self.command_interpreter(pkt.req)(*pkt.args)
+            self.cmail.send(self.tr_mailbox,pkt.pipe, str(result))
+            
     def core_machine(self):
+        status=self.core_machine_status
         while True:
-            pkt=self.cmail.pread()
-            if isinstance(pkt, transmitter_packet):
-                result=self.command_interpreter(pkt.req)(*pkt.args)
-                self.cmail.send(self.tr_mailbox, pkt.pipe, str(result))        
-
+            if status=='accept-all':
+                if self.cmail.check('tag')=='transmitter':
+                    self.transmit_back()
+                if self.cmail.check('tag')!='nil':
+                    print(self.cmail.check('tag'))
+            elif status=='refuse-all':
+                while not self.cmail.clearp():
+                    self.cmail.preserve()
+            elif status=='only-transmitter':
+                if self.cmail.check('tag')=='transmitter':
+                    self.transmit_back()
+                else: self.cmail.preserve()
+                    
+                    
     def run(self):
         threading.Thread(target=self.core_machine, args=()).start()
+
 
 
     def shut_down(self):            #write the log and shut down the state machine

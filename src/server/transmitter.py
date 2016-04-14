@@ -14,7 +14,7 @@ import socket                                   #socket offical module
 import time                                     #time official module
 
 import os                                       #for fortune!
-#import mailer                                   #mailer module.
+
 from mailer import mail
 from mailer import mailbox
 import platform                                 #judge the platform
@@ -214,6 +214,13 @@ class transmitter_packet():
         self.func=fn
     def eval_func(self):
         return self.func(*self.args)
+
+
+
+    
+
+
+
 
 
 '''
