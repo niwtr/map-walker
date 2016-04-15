@@ -249,6 +249,19 @@ class mailbox():
     #send mails to other mailbox
     def send(self, mailb, *msg):
         mailb.get_mail(mail(self.get_mail_address(),*msg))
+        
+    def send_mail(self, mailb, m):
+        mailb.get_mail(m)
+
+    def echo_bind(self, m):
+        fr=m('tag')
+        def echo(res):
+            self.send(fr, lambda x:x, res)
+        echomail=mail(fr,echo,m())
+        return echomail
+
+
+
 
         
     #show all the mails in mailbox

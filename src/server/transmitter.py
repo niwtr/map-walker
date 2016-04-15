@@ -7,7 +7,8 @@ Current version : 0.3
 by Heranort 
 '''
 
-def print(*c, end=''):pass #quiet!!!
+
+
 
 import threading                                #for thread creation
 import socket                                   #socket offical module
@@ -57,8 +58,11 @@ Happy hacking with the M_A_S_S!
 
 
 
+def print(*c, end=''):log_file.info(*c)
+def prinw(*c, end=''):log_file.warn(*c)
 
 class M_A_S_S():
+    
 
     plist=[]
 
@@ -156,7 +160,7 @@ class M_A_S_S():
         try:
             self.sock.send(estring)
         except BrokenPipeError as err:
-            print(self.server_name+': '+"Encounter BROKENPIPE!")
+            prinw(self.server_name+': '+"Encounter BROKENPIPE!")
             self.sock.close()
             self.sock_thread._delete()
 
@@ -185,7 +189,7 @@ class M_A_S_S():
                 self.sock_thread.start()     #blocked till connection establishs
 
             except socket.timeout:
-                print(self.server_name+': '+"Connection timeout, unbound.")
+                prinw(self.server_name+': '+"Connection timeout, unbound.")
 
 
 
@@ -204,21 +208,14 @@ argument tuple can be applied to the function interpreted.
 ################################################################################
 '''
 class transmitter_packet():
-    def __init__(self,MASS,req,args):
+    def __init__(self,MASS, func,args):
         self.MASS=MASS
-        self.func=print
-        self.req=req
+        self.func=func
         self.args=args
         self.pipe=MASS.speak_to_client
-    def set_func(self, fn):
-        self.func=fn
+
     def eval_func(self):
         return self.func(*self.args)
-
-
-
-    
-
 
 
 
@@ -248,14 +245,16 @@ class transmit_env():
     env: left empty currently.
     '''
 
-    def __init__(self,core_mail):
+    def __init__(self,core_mail, interpreter):
 
         self.tmail=mailbox('transmitter',50)        
         self.cmail=core_mail
+        self.interpreter=interpreter
         self.env=[]
         self.dispatcher_MASS=[]
         self.init_dispatcher_MASS()
         self.MASSES=[]
+    
         for pl in M_A_S_S_PLIST:
             self.MASSES.append(M_A_S_S(pl,self.machine))
 
@@ -290,7 +289,7 @@ class transmit_env():
         cmd=cmd.split('::')        #seperate the command by double-colons
         command=cmd[0]             #the first element should be command. 
         args=tuple(eval(cmd[1]))   #the argument list, tupled
-        pkt=transmitter_packet(MASS,command,args)   #pack up the message.
+        pkt=transmitter_packet(MASS,self.interpreter(command),args)   #pack up the message.
         return pkt
     
     def shutdown_MASS(self, com):
@@ -361,7 +360,10 @@ class transmit_env():
 
             ddata=data.decode('utf-8')
 
-
+            if not ddata:
+                prinw(str(MASS.server_name)+': Encounter Brokenpipe.')
+                break
+                
             if(ddata=='exit'):              #this command'd not be sent to interpreter.
                 MASS.speak_to_client('closed')
                 MASS.unbound_server()       #close the sock.
@@ -439,63 +441,6 @@ class transmit_env():
 
 
 
-'''.....................testing and usage.......................................'''
-'''
-a=transmit_env([])
-
-
-#Preserved for core module
-
-def __core():
-    while True:
-        if(platform.system() == 'Linux'):
-            os.system("clear")          #clear terminal output
-        elif(platform.system() == 'Windows'):
-            os.system("cls")            #clear terminal output
-        a.monitor_terminal()
-        time.sleep(5)
-
-
-threading.Thread(target=a.seq_start, args=()).start()
-__core()
-
-'''
-
-
-
-
-'''class for writing logs.'''
-
-class transmit_logger():
-
-
-
-    '''
-    When a transmission error occured, this function would be called.
-    Alter the environment variables sent to this function.
-    Send error codes and messages to log file.
-    ##
-    error_code: error code.
-    env: A list of environment variables. 
-    ##
-    '''
-
-    def handle_transmission_error(env):
-        pass
-
-
-    '''
-    design: Heranort
-    Send transmission log to the log module.
-    ##
-    message: log message to be sent
-    bad_p: predication of wether the message is normal or bad. 
-           Will be delivered to differenet log files.
-    lcode: log code to send.
-    ##
-    '''
-    def send_transmit_log(message,bad_p,lcode):
-        pass
 
 
     

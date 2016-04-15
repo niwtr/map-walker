@@ -51,6 +51,7 @@ class core_domain():
         pass
 
 
+
     def initialize_env(self):       #initialize the environment.
         self.core_machine_status='accept-all'
         '''INIT CORE MAILBOX'''
@@ -60,7 +61,7 @@ class core_domain():
         '''INIT ROUTER MODULE'''
         self.router=router_module(self.cmail, self.database)        
         '''INIT TRANSMITTER ENVIRONMENT'''
-        self.transmitter=transmit_env(self.cmail)
+        self.transmitter=transmit_env(self.cmail,self.command_interpreter)
 
         '''TRANSMITTER MAILBOX'''
         self.tr_mailbox=self.transmitter.tmail
@@ -80,24 +81,17 @@ class core_domain():
     def transmit_back(self):
         pkt=self.cmail.pread()
         if isinstance(pkt, transmitter_packet):
-            result=self.command_interpreter(pkt.req)(*pkt.args)
-            self.cmail.send(self.tr_mailbox,pkt.pipe, str(result))
+            self.cmail.send(self.tr_mailbox,pkt.pipe, str(pkt.eval_func()))
             
     def core_machine(self):
-        status=self.core_machine_status
+
         while True:
-            if status=='accept-all':
+            if self.core_machine_status=='accept-all':
                 if self.cmail.check('tag')=='transmitter':
                     self.transmit_back()
-                if self.cmail.check('tag')!='nil':
-                    print(self.cmail.check('tag'))
-            elif status=='refuse-all':
+            elif self.core_machine_status=='refuse-all':
                 while not self.cmail.clearp():
                     self.cmail.preserve()
-            elif status=='only-transmitter':
-                if self.cmail.check('tag')=='transmitter':
-                    self.transmit_back()
-                else: self.cmail.preserve()
                     
                     
     def run(self):
@@ -257,4 +251,12 @@ class shelled_core(core_domain):
 
 
 if __name__=='__main__':
-    shelled_core().init_core().monitor()
+    mode=0
+    if mode==0:
+        shelled_core().init_core().monitor()
+    else:
+        #for clean testing.
+        a=core_domain()
+        a.initialize_env()
+        a.start_transmitter()
+        a.run()
