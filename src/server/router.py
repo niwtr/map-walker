@@ -45,7 +45,7 @@ class router_module():
     ction to the data base, checking the health of connection between core, and est-
     ablishing user history.
     '''    
-    def __init__(self, database_binding):
+    def __init__(self, core_mail_binding, database_binding):
         self.data_all=database_binding.data_all
 
     def minimal_cost_path(self,id_src, id_dest):
