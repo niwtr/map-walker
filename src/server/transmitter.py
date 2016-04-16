@@ -68,8 +68,8 @@ class M_A_S_S():
 
     sock=[]                                #the actual socket binding
 
-    address='127.0.0.1'                    #ip address.
-
+    address=[]                             #ip address bingding. generated below.
+    
     com=9999                               #com for the socket
 
     machine=print                          #algorithm machine or procedure
@@ -90,7 +90,6 @@ class M_A_S_S():
        {
             'name'    : 'SERVER',
             'welcome' : 'Enjoy working with MASS.',
-            'address' : '127.0.0.1',
             'com'     : 9999,
             'speed'   : 0.5
 
@@ -106,7 +105,8 @@ class M_A_S_S():
         self.plist=plist
         self.server_name=plist['name']
         self.server_welcome_string=plist['welcome']
-        self.address=plist['address']
+
+        self.address=socket.gethostbyname(socket.gethostname())
         self.com=plist['com']
         self.speed=plist['speed']
         self.time_out=plist['time']

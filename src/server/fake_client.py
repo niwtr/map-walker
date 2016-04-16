@@ -4,7 +4,7 @@
 import socket
 #get the com.
 ds=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-ds.connect(('127.0.0.1',9999))
+ds.connect(('10.201.12.242',9999))
 print(ds.recv(1024).decode('utf-8'))
 addr=int(ds.recv(1024).decode('utf-8'))
 ds.close()
@@ -12,7 +12,7 @@ ds.close()
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print('Addr:' +str(addr))
-s.connect(('127.0.0.1',addr))
+s.connect(('10.201.12.242',addr))
 
 print(s.recv(1024).decode('utf-8'))
 
