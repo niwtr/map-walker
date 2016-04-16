@@ -41,15 +41,10 @@ Process the raw data.
 '''
 def datab_process_data(raw_data):
     data_price = [[[] for i in range(10)] for i in range(10)]
-    data_distance = [[[] for i in range(10)] for i in range(10)]
     data_time = [[[] for i in range(10)] for i in range(10)]
-    data_route = [[[] for i in range(10)] for i in range(10)]
     for element in raw_data:
         data_price[int(element[3])-1][int(element[5])-1].append(element[8])
         data_price[int(element[5])-1][int(element[3])-1].append(element[8])
-
-        data_distance[int(element[3])-1][int(element[5])-1].append(element[7])
-        data_distance[int(element[5])-1][int(element[3])-1].append(element[7])
 
         #convert time format to integer
         temp_int = 0
@@ -62,10 +57,7 @@ def datab_process_data(raw_data):
 
         data_time[int(element[3])-1][int(element[5])-1].append(temp_int)
         data_time[int(element[5])-1][int(element[3])-1].append(temp_int)
-
-        data_route[int(element[3])-1][int(element[5])-1].append(element[1])
-        data_route[int(element[5])-1][int(element[3])-1].append(element[1])
-    lis = {'price': data_price,'time': data_time, 'distance': data_distance, 'route': data_route}
+    lis = {'price': data_price,'time': data_time}
     return lis
 
 '''
@@ -83,7 +75,7 @@ Mix all the different transportation to one data list
 '''
 def datab_mix_all(data_flight, data_train, data_bus):
     data_all = {'flight': data_flight, 'train': data_train, 'bus': data_bus}
-    log_file.info('database successfully possessed')
+    log_file.info('database successfully processed')
     return data_all
 
 '''
@@ -91,16 +83,6 @@ Check wether the history is modified. If so, emit warning.
 '''
 def check_health():
     pass
-
-
-def init_database():
-    sql = connect_to_datab()
-    (raw_data_flight, raw_data_train, raw_data_bus) = datab_get_raw_data(sql)
-    data_flight = datab_process_data(raw_data_flight)
-    data_train = datab_process_data(raw_data_train)
-    data_bus = datab_process_data(raw_data_bus)
-    data_all = datab_mix_all(data_flight, data_train, data_bus)   #the final data
-    data_name = datab_get_name(raw_data_train)  #station_name    
 
 class database_binding():
     sql=[]
