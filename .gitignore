@@ -1,3 +1,5 @@
 src/server/.idea
 *.pyc
 desktop.ini
+data/log.txt
+data/log_test.txt
