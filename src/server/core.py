@@ -86,6 +86,7 @@ class core_domain():
     def core_machine(self):
 
         while True:
+            time.sleep(0.0001)             #...
             if self.core_machine_status=='accept-all':
                 if self.cmail.check('tag')=='transmitter':
                     self.transmit_back()
