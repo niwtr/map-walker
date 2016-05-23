@@ -2,7 +2,21 @@ from datab import database_binding
 
 from router import router_module
 
-
+'''
+################################################################################
+                     Server-Client Text Protocol (SCTP)
+                            Case in Server
+Serves as a medium layer between the core algorithm machine and transmitter.
+The result of the calculation by router module is incomplete. We need to transfer
+more information about the route, ex, the price, time and distance between 
+arbitrary two nodes. Now, we need to extend the result to be sent to the client, 
+adding redundancies.
+Besides, we also added two new commands, query and query_all. 
+The query command can seach for the (time, price, distance) between two nodes.
+The query_all command can parse the path-list and return every information between
+two nodes of each hop. Now enjoy it.
+################################################################################
+'''
 
 class scprotocol():
     
@@ -78,5 +92,5 @@ class scprotocol():
             
             res.append([current[0], nextn[0], mean, 
                         query_res[0], query_res[1], query_res[2]])                        ])
-        return res
+        return (res)
             
