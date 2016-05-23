@@ -76,9 +76,9 @@ class scprotocol():
     
     def query(self, from_node, to_node, mean_of_transportation):
         return (self.tdist(from_node, to_node, mean_of_transportation), 
-                self.cdist(from_node, to_node, mean_of_transportation),
-                self.ddist(from_node, to_node, mean_of_transportation)
-                )
+                self.cdist(from_node, to_node, mean_of_transportation))#,
+               # self.ddist(from_node, to_node, mean_of_transportation)
+                #)
     
     #(time, cost, distance)
 
@@ -91,6 +91,6 @@ class scprotocol():
             query_res=self.query(current[0], nextn[0], mean)
             
             res.append([current[0], nextn[0], mean, 
-                        query_res[0], query_res[1], query_res[2]])                        ])
+                        query_res[0], query_res[1]])#, query_res[2]])            
         return (res)
             

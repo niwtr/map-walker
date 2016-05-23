@@ -44,6 +44,8 @@ permitted_fn: only permitted functions are callable, aka, controllable by outsid
 
 
 
+def prinl(*c, end=''):log_file.info(*c)
+def prinw(*c, end=''):log_file.warn(*c)
 
 class core_domain():
 
@@ -100,7 +102,15 @@ class core_domain():
         pkt=self.cmail.pread()
         
         if isinstance(pkt, transmitter_packet):
-            self.cmail.send(self.tr_mailbox, pkt.pipe, str(pkt.eval_func()))
+            try:
+                self.cmail.send(self.tr_mailbox, pkt.pipe, str(pkt.eval_func()))
+            except:
+                self.cmail.send(self.tr_mailbox, pkt.pipe, "ERROR ARG")
+                prinw("MASS "+str(pkt.MASS_NAME)+ " sent error argument.")
+                
+                
+                
+          
             
     def core_machine(self):
 
@@ -273,7 +283,7 @@ class shelled_core(core_domain):
 if __name__=='__main__':
     mode=0
     if mode==0:
-        shelled_core().init_core()#.monitor()
+        shelled_core().init_core().monitor()
     else:
         #for clean testing.
         a=core_domain()

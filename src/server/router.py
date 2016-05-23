@@ -121,7 +121,8 @@ def minimal_cost_restricted(datab_link, source, destination, restrict):
         return dist(v1, v2, 'time', mean)
     def cdist(v1, v2, mean):
         return dist(v1, v2, 'price', mean)
-    
+    def ddist(v1, v2, mean):
+        return 0
     pass
 
 
@@ -157,8 +158,8 @@ class router_module():
         return minimal_path(self.data_all, id_src, id_dest, 'time')
 
         
-    def restricted_minimal_cost_path(self, id_src, id_dest, restrict):
-        return minimal_cost_restricted(self.data_all, id_src, id_dest, restrict)
+   # def restricted_minimal_cost_path(self, id_src, id_dest, restrict):
+   #     return minimal_cost_restricted(self.data_all, id_src, id_dest, restrict)
         
     
     

@@ -125,6 +125,7 @@ class M_A_S_S():
     def linque_fn (self, sock, addr):
         
         print(self.server_name+':'+'Accept new connection from %s:%s...' % addr)
+        print(self.server_name+" bounded to MASS "+str(self))
         sock.send(b'established')                   #connection acknowledge.
         self.machine(self)
         print (self.server_name+':'+'connection from %s:%s closed.' % addr)
@@ -214,6 +215,7 @@ argument tuple can be applied to the function interpreted.
 class transmitter_packet():
     def __init__(self,MASS,func,args):
         self.MASS=MASS
+        self.MASS_NAME=self.MASS.server_name
         self.func=func
         self.args=args
         self.pipe=MASS.speak_to_client
