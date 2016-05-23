@@ -42,6 +42,7 @@ Process the raw data.
 def datab_process_data(raw_data):
     data_price = [[[] for i in range(10)] for i in range(10)]
     data_time = [[[] for i in range(10)] for i in range(10)]
+    data_distance = [[[] for i in range(10)] for i in range(10)]
     for element in raw_data:
         data_price[int(element[3])-1][int(element[5])-1].append(element[8])
         data_price[int(element[5])-1][int(element[3])-1].append(element[8])
@@ -57,7 +58,10 @@ def datab_process_data(raw_data):
 
         data_time[int(element[3])-1][int(element[5])-1].append(temp_int)
         data_time[int(element[5])-1][int(element[3])-1].append(temp_int)
-    lis = {'price': data_price,'time': data_time}
+
+        data_distance[int(element[3])-1][int(element[5])-1].append(element[1])
+        data_distance[int(element[5])-1][int(element[3])-1].append(element[1])
+    lis = {'price': data_price, 'time': data_time, 'distance': data_distance}
     return lis
 
 '''
