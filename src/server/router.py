@@ -22,7 +22,6 @@ from log import log_file
 
 
 
-
 '''
 Write the current route to history.
 The history maybe used twice for reference of path recommendation.
@@ -30,7 +29,6 @@ The history maybe used twice for reference of path recommendation.
 
 def emit_to_history(route):
     pass
-
 
 
 '''
@@ -109,27 +107,36 @@ def minimal_path(datab_link, source, destination, mode):
     return (path[k], dis[k])
 
 
-
-
-        
-
 def minimal_cost_restricted(datab_link, source, destination, restrict):
     def dist(v1, v2, mode, mean):
         meandict={0:'flight', 1:'train', 2:'bus'}
         return datab_link[meandict[mean]][mode][v1][v2][0]
+
     def tdist(v1, v2, mean):
         return dist(v1, v2, 'time', mean)
+
     def cdist(v1, v2, mean):
         return dist(v1, v2, 'price', mean)
-    def ddist(v1, v2, mean):
-        return 0
-    pass
 
+def minimal_path_restricted(datab_link, source,destination, limit, mode):
+    data_flight_time = datab_link['flight']['time']
+    data_flight_price = datab_link['flight']['price']
+    city_num = len(data_flight_time)
+    dp = [[-1 for i in range(10)] for i in range(limit+1)]
+    for i in range(9, -1, -1):
+        for j in range(limit + 1):
+            if(data_flight_time[source][i] and data_flight_time[source][i][0] <= j):
+                dp[j][i] = data_flight_price[source][i][0]
 
+    for i in range(10):
+        for l in range(limit + 1):
+            if(data_flight_time[source][i] and l >= data_flight_time[source][i][0]):
+                dp[l][i] = min(dp[l][i], dp[l - data_flight_time[source][i][0]][i] + data_flight_price[source][i][0])
 
-
-    
-
+    for i in range(10):
+        for j in range(limit+1):
+            print(dp[j][i], end=' ')
+        print('')
 
 '''
 ################################################################################
@@ -138,66 +145,25 @@ Exporting route_calculating functions used by core.
 Does not contian a mailbox.
 ################################################################################
 '''
-
 class router_module():  
     data_all=[]
     '''
     Initialize the router module, including initializing the mailer, ensuring conne-
     ction to the data base, checking the health of connection between core, and est-
     ablishing user history.
-    '''    
+    '''
     def __init__(self, core_mail_binding, database_binding):
         self.data_all=database_binding.data_all
-        
-        
+
     def minimal_cost_path(self,id_src, id_dest):
         return minimal_path(self.data_all, id_src,id_dest, 'price')
 
-    
     def minimal_time_path(self, id_src, id_dest):
         return minimal_path(self.data_all, id_src, id_dest, 'time')
 
-        
-   # def restricted_minimal_cost_path(self, id_src, id_dest, restrict):
-   #     return minimal_cost_restricted(self.data_all, id_src, id_dest, restrict)
-        
-    
-    
-    
-    
+    def restricted_minimal_cost_path(self, id_src, id_dest, restrict):
+        return minimal_cost_restricted(self.data_all, id_src, id_dest, restrict)
+
 if(__name__ == '__main__'):
-
-    pass
-
-
-    '''
-    sql = datab.connect_to_datab()
-    (raw_data_flight, raw_data_train, raw_data_bus) = datab.datab_get_raw_data(sql)
-    data_flight = datab.datab_process_data(raw_data_flight)
-    data_train = datab.datab_process_data(raw_data_train)
-    data_bus = datab.datab_process_data(raw_data_bus)
-    data_all = datab.datab_mix_all(data_flight, data_train, data_bus)   #the final data
-    data_name = datab.datab_get_name(raw_data_flight)
-    
-    database=database_binding()
-    (path_cost, min_cost) = minimal_path(data_all, 0, [9, 2, 1, 6], 'price')
-
-    (path_time, min_time) = minimal_path(data_all, 0, [1, 2, 6, 9], 'time')
-    
-    def print_path(data_path, data_name):
-        for element in data_path:
-            print(data_name[element[0]], end=' ')
-            if(element[1] == 0):
-                print('-飞机->', end=' ')
-            elif(element[1] == 1):
-                print('-火车->', end=' ')
-            elif(element[1] == 2):
-                print('-汽车->', end=' ')
-                
-
-    print_path(path_cost, data_name)
-    print(min_cost)
-    print_path(path_time, data_name)
-    print(min_time)
-    '''
-    
+    database = database_binding()
+    minimal_path_restricted(database.data_all, 1, 5, 120, 'price')
