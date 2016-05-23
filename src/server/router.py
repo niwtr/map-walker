@@ -8,9 +8,7 @@ Three strategies are required:
  2. minimal time
  3. minimal cost in a limited time.
 
-The path calculated already must be stored somewhere to suppor the tracer module.
-
-RUN OTTA TIME, SEE YOU TOMMORROW.
+The path calculated already must be stored somewhere to support the tracer module.
 
 Design: Heranort, L.Laddie
 '''
@@ -21,11 +19,6 @@ import log
 from datab import database_binding
 import copy
 from log import log_file
-
-
-
-
-
 
 
 
@@ -51,6 +44,7 @@ def minimal_path(datab_link, source, destination, mode):
     dat_train = datab_link['train'][mode]
     dat_bus = datab_link['bus'][mode]
     minimal = [[[-1 for i in range(2)] for i in range(10)] for i in range(10)]
+    #cmt: the 0th level denotes the val, the 1th level denotes the mean of transportation.
     inf = 100000   #set a infite value
 
     #caluclate the minimal price matrix
@@ -68,7 +62,7 @@ def minimal_path(datab_link, source, destination, mode):
 
             if(a <= b and a <= c):   #the flight has lower price
                 minimal[i][j][0] = a
-                minimal[i][j][1] = 0
+                minimal[i][j][1] = 0      
             elif(b <= a and b <= c):  #the train has lower price
                 minimal[i][j][0] = b
                 minimal[i][j][1] = 1
@@ -85,14 +79,14 @@ def minimal_path(datab_link, source, destination, mode):
 
     for i in range(10):
         dis[i] = minimal[source][i][0]
-        path[i] = [[source, minimal[source][i][1]]]
+        path[i] = [[source, minimal[source][i][1]]]    ##
     dis[source] = 0
     final[source] = True
     k = -1     #the last arrive city id
     for i in range(9):
         k = -1
         min_temp = inf     #find the minimal dis[j]
-        for j in range(10):
+        for j in range(10):    #relax.
             if(final[j] == False and dis[j] < min_temp):
                 k = j
                 min_temp = dis[j]
@@ -115,12 +109,25 @@ def minimal_path(datab_link, source, destination, mode):
     return (path[k], dis[k])
 
 
-def minimal_cost_restricted(datab_link, source,destination):
+
+
+        
+
+def minimal_cost_restricted(datab_link, source, destination, restrict):
+    def dist(v1, v2, mode, mean):
+        meandict={0:'flight', 1:'train', 2:'bus'}
+        return datab_link[meandict[mean]][mode][v1][v2][0]
+    def tdist(v1, v2, mean):
+        return dist(v1, v2, 'time', mean)
+    def cdist(v1, v2, mean):
+        return dist(v1, v2, 'price', mean)
     
     pass
 
 
 
+
+    
 
 
 '''
@@ -141,7 +148,7 @@ class router_module():
     def __init__(self, core_mail_binding, database_binding):
         self.data_all=database_binding.data_all
         
-
+        
     def minimal_cost_path(self,id_src, id_dest):
         return minimal_path(self.data_all, id_src,id_dest, 'price')
 
@@ -150,7 +157,9 @@ class router_module():
         return minimal_path(self.data_all, id_src, id_dest, 'time')
 
         
-    
+    def restricted_minimal_cost_path(self, id_src, id_dest, restrict):
+        return minimal_cost_restricted(self.data_all, id_src, id_dest, restrict)
+        
     
     
     

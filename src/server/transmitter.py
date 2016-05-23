@@ -23,6 +23,7 @@ import sys
 
 from mass_plists import M_A_S_S_PLIST           #property list for MASSES
 from mass_plists import DISPATCH_PLIST
+
 from log import log_file                        #log object
 '''
 ################################################################################
@@ -107,6 +108,7 @@ class M_A_S_S():
         self.server_welcome_string=plist['welcome']
 
         self.address=socket.gethostbyname(socket.gethostname())
+
         self.com=plist['com']
         self.speed=plist['speed']
         self.time_out=plist['time']
@@ -138,7 +140,7 @@ class M_A_S_S():
     def sock_tcp_establish(self, ip_addr, com):
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(self.time_out)
-
+    
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         #handle the error that "address is used."
@@ -183,8 +185,10 @@ class M_A_S_S():
 
             s=self.sock_tcp_establish(self.address, self.com)
             try:
+                
                 sock,addr=s.accept()
                 self.sock=sock
+                
                 self.sock_thread=threading.Thread(target=self.linque_fn,args=(sock, addr),name='Server'+str(self.com))
                 self.sock_thread.start()     #blocked till connection establishs
 
@@ -208,7 +212,7 @@ argument tuple can be applied to the function interpreted.
 ################################################################################
 '''
 class transmitter_packet():
-    def __init__(self,MASS, func,args):
+    def __init__(self,MASS,func,args):
         self.MASS=MASS
         self.func=func
         self.args=args
@@ -282,15 +286,26 @@ class transmit_env():
         mtp::[1,[2,3,4]]
     can be parsed into <request_command>:=mtp,
                        <argument_list>  :=[1,[2,3,4]]
+        trace::[99199,[1,[2,3,4]]]         
+    can be parsed into <request_command>:=trace,
+                       <augument_list>  :=[99199, [1,[2,3,4]]], where 
+                       current time:=99199
+                       path_list:=[1,[2,3,4]]
+    the server should resend the coordinate.
+                       
     '''
 
         
     def cmd_evaluator(self,cmd,MASS):
         cmd=cmd.split('::')        #seperate the command by double-colons
         command=cmd[0]             #the first element should be command. 
-        args=tuple(eval(cmd[1]))   #the argument list, tupled
-        pkt=transmitter_packet(MASS,self.interpreter(command),args)   #pack up the message.
-        return pkt
+        if(len(cmd)<2):
+            pkt=transmitter_packet(MASS, self.interpreter(command), ())
+            return pkt
+        else:
+            args=tuple(eval(cmd[1]))   #the argument list, tupled
+            pkt=transmitter_packet(MASS,self.interpreter(command),args)   #pack up the message.
+            return pkt
     
     def shutdown_MASS(self, com):
         isFound=False
