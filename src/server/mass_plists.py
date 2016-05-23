@@ -27,7 +27,7 @@ M_A_S_S_PLIST=[
     'name'    : 'SLOW_SERVER_COM_9997',
     'welcome' : 'Enjoy working with MASS. --9997',
     'com'     : 9997,
-    'speed'   : 2,
+    'speed'   : 1,
     'time'    : 5
 
 },
@@ -44,10 +44,10 @@ M_A_S_S_PLIST=[
 
 {
 
-    'name'    : 'TURTLE_SERVER_COM_9995',
+    'name'    : 'FAST_SERVER_COM_9995',
     'welcome' : 'Enjoy working with MASS. --9995',
     'com'     : 9995,
-    'speed'   : 4.0,
+    'speed'   : 0.2,
     'time'    : 5
 
 },

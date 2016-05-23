@@ -20,6 +20,7 @@ import time
 import mailer
 from datab import database_binding
 from router import router_module
+from textprotocol import scprotocol
 from transmitter import transmit_env
 from transmitter import transmitter_packet
 from log import log_file
@@ -62,7 +63,7 @@ class core_domain():
         self.router=router_module(self.cmail, self.database)        
         '''INIT TRANSMITTER ENVIRONMENT'''
         self.transmitter=transmit_env(self.cmail,self.command_interpreter)
-
+        self.scprotocol=scprotocol(self.router, self.database)
         '''TRANSMITTER MAILBOX'''
         self.tr_mailbox=self.transmitter.tmail
 
@@ -72,21 +73,39 @@ class core_domain():
 
     '''interprete the request command into actual functions'''
     def command_interpreter(self,cmd):
+        def nil (*arg):
+            return "ERROR COMMAND"
         if cmd=='mtp':
-            return self.router.minimal_time_path
+            return self.scprotocol.mtp
         elif cmd=='mcp':
-            return self.router.minimal_cost_path
+            return self.scprotocol.mcp
+        elif cmd=='rmcp':
+            return self.router.restricted_minimal_cost_path
+        elif cmd=="query":
+            return self.scprotocol.query
+        elif cmd=="query_all": #in this part, we must 
+            return self.scprotocol.query_all
+        else :
+            return nil
         
+        '''
+        elif cmd=='rmcp':
+            return self.router.restricted_minimal_cost_path
+        elif cmd=='trace':
+            return self.tracer.trace
+        '''
         
     def transmit_back(self):
+        
         pkt=self.cmail.pread()
+        
         if isinstance(pkt, transmitter_packet):
-            self.cmail.send(self.tr_mailbox,pkt.pipe, str(pkt.eval_func()))
+            self.cmail.send(self.tr_mailbox, pkt.pipe, str(pkt.eval_func()))
             
     def core_machine(self):
 
         while True:
-            time.sleep(0.0001)             #...
+            #time.sleep(0.0001)             #...
             if self.core_machine_status=='accept-all':
                 if self.cmail.check('tag')=='transmitter':
                     self.transmit_back()
@@ -134,7 +153,7 @@ class shelled_core(core_domain):
             print(c,end='')    
         
     
-    def mail_interface(self, mail_box):
+    def mailbox_monitor_interface(self, mail_box):
         self.prinl('-')
         print('Mailbox '+str(mail_box))
         self.prinl('-')
@@ -155,7 +174,7 @@ class shelled_core(core_domain):
         print('Press t to check transmitter mailbox history')
         print('Press c to check core mailbox history')
 
-    def server_monitor(self):
+    def server_monitor_interface(self):
         servs=self.transmitter.get_server_status()
         ids=servs['idling']
         wds=servs['working']
@@ -198,7 +217,7 @@ class shelled_core(core_domain):
                 self.prinl('-')
                 print('Server monitor.')
                 self.prinl('-')
-                self.server_monitor()
+                self.server_monitor_interface()
                 self.prinl('-')
                 print('Pass o to return to main interface.')
                 self.prinl('-')
@@ -216,10 +235,10 @@ class shelled_core(core_domain):
                 tty.setcbreak(sys.stdin.fileno())  
                 
             elif status=='cmail':
-                self.mail_interface(self.cmail)
+                self.mailbox_monitor_interface(self.cmail)
 
             elif status=='tmail':
-                self.mail_interface(self.transmitter.tmail)
+                self.mailbox_monitor_interface(self.transmitter.tmail)
                 
             if select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []):
                 c = sys.stdin.read(1)
@@ -254,7 +273,7 @@ class shelled_core(core_domain):
 if __name__=='__main__':
     mode=0
     if mode==0:
-        shelled_core().init_core().monitor()
+        shelled_core().init_core()#.monitor()
     else:
         #for clean testing.
         a=core_domain()

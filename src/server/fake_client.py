@@ -3,8 +3,10 @@
 
 import socket
 #get the com.
+
+ip_address=socket.gethostbyname(socket.gethostname())#'10.201.12.244'
 ds=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-ds.connect(('10.201.12.242',9999))
+ds.connect((ip_address,9999))
 print(ds.recv(1024).decode('utf-8'))
 addr=int(ds.recv(1024).decode('utf-8'))
 ds.close()
@@ -12,7 +14,7 @@ ds.close()
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print('Addr:' +str(addr))
-s.connect(('10.201.12.242',addr))
+s.connect((ip_address,addr))
 
 print(s.recv(1024).decode('utf-8'))
 
