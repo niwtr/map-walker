@@ -162,6 +162,7 @@ class M_A_S_S():
         estring=string.encode('utf-8')
         try:
             self.sock.send(estring)
+        
         except BrokenPipeError as err:
             prinw(self.server_name+': '+"Encounter BROKENPIPE!")
             self.sock.close()
@@ -260,6 +261,7 @@ class transmit_env():
         self.dispatcher_MASS=[]
         self.init_dispatcher_MASS()
         self.MASSES=[]
+        self.MASSN=1
     
         for pl in M_A_S_S_PLIST:
             self.MASSES.append(M_A_S_S(pl,self.machine))
@@ -299,9 +301,11 @@ class transmit_env():
 
         
     def cmd_evaluator(self,cmd,MASS):
-
+        
         cmd=cmd.split('::')        #seperate the command by double-colons
+        
         command=cmd[0]             #the first element should be command. 
+
         if(len(cmd)<2):
             pkt=transmitter_packet(MASS, self.interpreter(command), ())
             return pkt
@@ -373,15 +377,15 @@ class transmit_env():
             '''
 	    
             try: 
-                data=MASS.sock.recv(1024)         
-		
+                data=MASS.sock.recv(1024)
+                
             except OSError:
                 MASS.unbound_server()
                 prinw("Encounter OS error.")
                 
                 break                       #Broken pipe, server shutted down 
 
-		
+            
             #time.sleep(MASS.speed)          #this sleep time is essential.
             #well.. never look back at such thing. this could cause a packet to fail.
 
@@ -401,8 +405,8 @@ class transmit_env():
                 self.tmail.send(self.cmail, lambda x:x, pkt)  
                                             #send the function prompt to the core.
                 wait_for_event()            #wait for the respond of the core.
-            self.tmail.pread()
-#            self.tmail.pread_all()           #execute all the mails.
+
+            self.tmail.pread()           #execute all the mails.
                 
     '''
 For safety, we have to use the pread() instead of the pread_all.
@@ -458,13 +462,31 @@ the pread_all is almost too fast and may cause two packets sent in a time.
     Start the servers sequentially. 
     '''    
     def seq_start(self):
+        def mass_counter():
+            while(1):
+                num=0
+                for mass in self.MASSES:
+                    if (mass.sock_thread.isAlive()):
+                        num+=1
+                if(num==0):
+                    self.MASSN=1
+                else:
+                    self.MASSN=num
+
+                time.sleep(1)
+            
+        
         def __seq_start():
+
             for mass in self.MASSES:
                 if (not mass.sock_thread.isAlive()):
+
                     self.current_idling_com=mass.com
                     self.init_dispatcher_MASS()
                     self.dispatcher_MASS.start()
                     mass.start()
+        a=threading.Thread(target=mass_counter)
+        a.start()
         while 1:
             __seq_start()
             time.sleep(2)

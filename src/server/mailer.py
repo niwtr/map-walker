@@ -177,6 +177,18 @@ class mailbox():
             return closure(arg)
         else: 
             pass
+    def npread(self, num=1,arg=0):
+        while(num>0):
+            print(num)
+            if(len(self.maillist)!=0):
+                closure=self.maillist.pop(0)
+                if (len(self.history)>self.history_len):
+                    self.history.pop(0)
+                self.history.append(closure)
+                closure(arg)
+            else: 
+                pass
+            num=num-1
         
     def pread_all(self, args=[]):
         retv=[]

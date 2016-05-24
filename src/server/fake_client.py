@@ -20,8 +20,6 @@ print(s.recv(1024).decode('utf-8'))
 
 def speak_to_server(s):
     
-    
-    
     while(1):
         print('SPEAK: ',end=''),
         dd=[]

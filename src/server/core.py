@@ -65,7 +65,7 @@ class core_domain():
         self.router=router_module(self.cmail, self.database)        
         '''INIT TRANSMITTER ENVIRONMENT'''
         self.transmitter=transmit_env(self.cmail,self.command_interpreter)
-        self.scprotocol=scprotocol(self.router, self.database)
+#        self.scprotocol=scprotocol(self.router, self.database)
         '''TRANSMITTER MAILBOX'''
         self.tr_mailbox=self.transmitter.tmail
 
@@ -78,15 +78,17 @@ class core_domain():
         def nil (*arg):
             return "ERROR COMMAND:"+str(arg)
         if cmd=='mtp':
-            return self.scprotocol.mtp
+            return self.router.minimal_time_path
         elif cmd=='mcp':
-            return self.scprotocol.mcp
+            return self.router.minimal_cost_path
         elif cmd=='rmcp':
             return self.router.restricted_minimal_cost_path
-        elif cmd=="query":
-            return self.scprotocol.query
-        elif cmd=="query_all": #in this part, we must 
-            return self.scprotocol.query_all
+        elif cmd=='echo':
+            return lambda x:x
+#        elif cmd=="query":
+#            return self.scprotocol.query
+#        elif cmd=="query_all": #in this part, we must 
+#            return self.scprotocol.query_all
         else :
             return nil
         
@@ -99,7 +101,7 @@ class core_domain():
         
     def transmit_back(self):
         
-        pkt=self.cmail.pread()
+        pkt=self.cmail.pread() #cowsay: original pread.
         
         if isinstance(pkt, transmitter_packet):
             try:
@@ -115,7 +117,9 @@ class core_domain():
     def core_machine(self):
 
         while True:
-            time.sleep(0.1)             #i have to slow down the core machine.
+      
+            time.sleep(0.1) #cowsay:original 0.1             #i have to slow down the core machine.
+
             if self.core_machine_status=='accept-all':
                 if self.cmail.check('tag')=='transmitter':
                     self.transmit_back()
@@ -130,6 +134,7 @@ class core_domain():
 
 
     def shut_down(self):            #write the log and shut down the state machine
+        
         pass
 
 
@@ -283,7 +288,7 @@ class shelled_core(core_domain):
 if __name__=='__main__':
     mode=0
     if mode==0:
-        shelled_core().init_core()#.monitor()
+        shelled_core().init_core().monitor()
     else:
         #for clean testing.
         a=core_domain()
