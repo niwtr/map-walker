@@ -6,7 +6,7 @@ Database module.
 Get the database, convert it to the built-in data structure and hold a link
 to it. The module should be initialized before any other modules except mailer
 and log.
-Design: Heranort, L.Laddie
+Design: L.Laddie
 '''
 
 import sqlite3, os, re, datetime
@@ -114,4 +114,4 @@ if(__name__ == '__main__'):
     (raw_data_flight, raw_data_train, raw_data_bus) = datab_get_raw_data(sql)
     data_path = datab_process_data(raw_data_flight, raw_data_train, raw_data_bus)
     for element in data_path[0][1]:
-        print(element.mode)
+        print(element.num)
