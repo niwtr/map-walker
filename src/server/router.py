@@ -14,7 +14,7 @@ Design: Heranort, L.Laddie
 '''
 
 import mailer
-import copy
+import copy, datetime
 from datab import database_binding
 from log import log_file
 
@@ -57,6 +57,13 @@ def minimal_path_restricted(datab_link, source,destination, limit, mode):
         for j in range(limit+1):
             print(dp[j][i], end=' ')
         print('')
+
+def transfer(date_time):
+    temp_time = date_time % (24 * 60)
+    hour = temp_time / 60
+    minute = temp_time % 60
+    temp_time = str(int(hour)) + ':' + str(int(minute))
+    return datetime.datetime.strptime(temp_time, '%H:%M')
 
 '''
 ################################################################################
@@ -109,7 +116,7 @@ class router_module:
         for i in range(9):
             k = -1
             min_temp = inf     #find the minimal dis[j]
-            for j in range(10):    #relax.
+            for j in range(10):
                 if(final[j] == False and dis[j] < min_temp):
                     k = j
                     min_temp = dis[j]
@@ -130,8 +137,85 @@ class router_module:
                     path[w].append(min_path[k][w])
         return path[k]
 
-    def minimal_time_path(self, id_src, id_dest):
-        pass
+    def minimal_time_path(self, source, destination):
+        min_path = [[] for i in range(10)]
+        inf = 1000000
+
+        #Prepare the data before dijkstra
+        for j in range(10):
+            min_temp = inf
+            for k in self.data_path[source][j]:
+                if(min_temp > k.travel_time):
+                    min_temp = k.travel_time
+                    min_path[j] = k
+
+        #dijkstra algorithm
+        final = [False for i in range(10)]
+        path = [[] for i in range(10)]
+        dis = [inf for i in range(10)]
+        last_time = [[] for i in range(10)]
+
+        for i in range(10):
+            if(min_path[i]):
+                dis[i] = min_path[i].travel_time
+                path[i] = [min_path[i]]
+                last_time[i] = transfer(min_path[i].travel_time)
+
+        final[source] = True
+        k = -1     #the last arrive city id
+        for i in range(9):
+            k = -1
+            min_temp = inf     #find the minimal dis[j]
+            for j in range(10):
+                if(final[j] == False and dis[j] < min_temp):
+                    k = j
+                    min_temp = dis[j]
+
+            final[k] = True      #add a city
+            if(k in destination):   #when a demand city added
+                destination.remove(k)
+                if(not destination):    #find all the demand city
+                    break
+                for i in range(10):     #from the last demand city to find others
+                    if(i != k):
+                        min_temp = inf
+                        temp_path = []
+                        for element in self.data_path[k][i]:
+                            payload = 0
+                            if(element.start_time > last_time[k]):
+                                temp_time = element.start_time - last_time[k]
+                                payload = temp_time.seconds/60
+                            else:
+                                temp_time = last_time[k] - element.start_time
+                                payload = 24 * 60 - (temp_time.seconds / 60)
+                            if(min_temp > element.travel_time + payload):
+                                min_temp = element.travel_time + payload
+                                dis[i] = min_temp + dis[k]
+                                temp_path = element
+                        path[i] = copy.deepcopy(path[k])
+                        path[i].append(temp_path)
+                        last_time[i] = transfer(dis[i])
+
+            for w in range(10):   #from the select city to update others
+                min_temp = inf
+                temp_path = []
+                for element in self.data_path[k][w]:
+                    payload = 0
+                    if(element.start_time > last_time[k]):
+                        temp_time = element.start_time - last_time[k]
+                        payload = temp_time.seconds / 60
+                    else:
+                        temp_time = last_time[k] - element.start_time
+                        payload = 24 * 60 - (temp_time.seconds / 60)
+                    if(min_temp > element.travel_time + payload):
+                        min_temp = element.travel_time + payload
+                        temp_path = element
+                if(final[w] == False and temp_path and (dis[k] + min_temp < dis[w])):
+                    dis[w] = dis[k] + min_temp
+                    path[w] = copy.deepcopy(path[k])
+                    path[w].append(temp_path)
+                    last_time[w] = transfer(dis[w])
+        return path[k]
 
     def restricted_minimal_cost_path(self, id_src, id_dest, restrict):
         return minimal_cost_restricted(self.data_path, id_src, id_dest, restrict)
@@ -139,6 +223,6 @@ class router_module:
 if(__name__ == '__main__'):
     database = database_binding()
     router_path = router_module(0 ,database)
-    path = router_path.minimal_cost_path(0, [8, 2])
+    path = router_path.minimal_time_path(0, [1, 2])
     for element in path:
-        print(element.source, element.destination, element.mode, element.price)
+        print(element.source, element.destination, element.mode, element.price, element.travel_time, element.start_time)

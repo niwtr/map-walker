@@ -9,7 +9,7 @@ and log.
 Design: Heranort, L.Laddie
 '''
 
-import sqlite3, os, re, time
+import sqlite3, os, re, datetime
 from log import log_file
 from enum import Enum
 
@@ -31,10 +31,10 @@ class router_path:
         self.destination = destination
         self.num = num
         self.mode = mode
-        self.travel_time = time.strptime(travel_time, '%H:%M')
+        self.travel_time = travel_time
         self.distance = distance
         self.price = price
-        self.start_time = time.strptime(start_time, '%H:%M')
+        self.start_time = datetime.datetime.strptime(start_time, '%H:%M')
 
 '''
 Connect to the database.
@@ -78,7 +78,7 @@ def datab_process_data(raw_data_flight, raw_data_train, raw_data_bus):
                 temp_string = temp_string.split('h')[1]
             if(temp_string.find('m') != -1):
                 minute = temp_string.split('m')[0]
-            travel_time = hour + ':' + minute
+            travel_time = int(hour) * 60 + int(minute)
 
             #convert the start time format
             fm = re.compile(r'\d{1,2}:\d\d')
