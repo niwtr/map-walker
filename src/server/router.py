@@ -15,11 +15,33 @@ Design: Heranort, L.Laddie
 
 import mailer
 import log
-#import datab
-from datab import database_binding
+import time
 import copy
 from log import log_file
+from enum import Enum
 
+'''
+Define the different vehicles
+'''
+class vehicle(Enum):
+    flight = 0
+    train = 1
+    bus = 2
+
+'''
+It is a class of one path which contains the source, destination, distance,
+starting time and so on.
+'''
+class router_path:
+    def __init__(self, source, destination, num, mode,travel_time, distance, price, start_time):
+        self.source = source
+        self.destination = destination
+        self.num = num
+        self.mode = mode
+        self.travel_time = travel_time
+        self.distance = distance
+        self.price = price
+        self.start_time = time.strptime(start_time, '%H:%M')
 
 
 '''
@@ -38,9 +60,9 @@ For example: minimal_path(data_all, 0, [1, 5, 9], 'price')
 ################################################################################
 '''
 def minimal_path(datab_link, source, destination, mode):
-    dat_flight = datab_link['flight'][mode]
-    dat_train = datab_link['train'][mode]
-    dat_bus = datab_link['bus'][mode]
+    dat_flight = datab_link['flight']
+    dat_train = datab_link['train']
+    dat_bus = datab_link['bus']
     minimal = [[[-1 for i in range(2)] for i in range(10)] for i in range(10)]
     #cmt: the 0th level denotes the val, the 1th level denotes the mean of transportation.
     inf = 100000   #set a infite value
@@ -153,10 +175,10 @@ class router_module():
     ablishing user history.
     '''
     def __init__(self, core_mail_binding, database_binding):
-        self.data_all=database_binding.data_all
+        self.data_all = database_binding.data_all
 
     def minimal_cost_path(self,id_src, id_dest):
-        return minimal_path(self.data_all, id_src,id_dest, 'price')
+            return minimal_path(self.data_all, id_src,id_dest, 'price')
 
     def minimal_time_path(self, id_src, id_dest):
         return minimal_path(self.data_all, id_src, id_dest, 'time')
@@ -165,5 +187,8 @@ class router_module():
         return minimal_cost_restricted(self.data_all, id_src, id_dest, restrict)
 
 if(__name__ == '__main__'):
-    database = database_binding()
-    minimal_path_restricted(database.data_all, 1, 5, 120, 'price')
+    pass
+    # database = database_binding()
+    # minimal_path_restricted(database.data_all, 1, 5, 120, 'price')
+    # path = Path(0, 1, 'CA002/003', 1200, 500, 600, '8:00')
+    # print(path.start_time > time.strptime('7:00', '%H:%M'))
