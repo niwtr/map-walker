@@ -9,9 +9,32 @@ and log.
 Design: Heranort, L.Laddie
 '''
 
-import sqlite3, os, re
+import sqlite3, os, re, time
 from log import log_file
-import router
+from enum import Enum
+
+'''
+Define the different vehicles
+'''
+class vehicle(Enum):
+    flight = 0
+    train = 1
+    bus = 2
+
+'''
+It is a class of one path which contains the source, destination, distance,
+starting time and so on.
+'''
+class router_path:
+    def __init__(self, source, destination, num, mode,travel_time, distance, price, start_time):
+        self.source = source
+        self.destination = destination
+        self.num = num
+        self.mode = mode
+        self.travel_time = travel_time
+        self.distance = distance
+        self.price = price
+        self.start_time = time.strptime(start_time, '%H:%M')
 
 '''
 Connect to the database.
@@ -43,7 +66,7 @@ Process the raw data to one list
 def datab_process_data(raw_data_flight, raw_data_train, raw_data_bus):
     data_path = [[[] for i in range(10)] for i in range(10)]
     raw_data = [raw_data_flight, raw_data_train, raw_data_bus]
-    mode = [router.vehicle.flight, router.vehicle.train, router.vehicle.bus]
+    mode = [vehicle.flight, vehicle.train, vehicle.bus]
     for i in range(3):
         for element in raw_data[i]:
             #convert time format to integer
@@ -61,7 +84,7 @@ def datab_process_data(raw_data_flight, raw_data_train, raw_data_bus):
             else:
                 ans = []
             for j in ans:
-                new_path = router.router_path(element[2], element[4], element[1], mode[i], temp_int, element[7], element[8], j)
+                new_path = router_path(element[2], element[4], element[1], mode[i], temp_int, element[7], element[8], j)
             data_path[int(element[3])-1][int(element[5])-1].append(new_path)
             data_path[int(element[5])-1][int(element[3])-1].append(new_path)
     return data_path
@@ -72,7 +95,7 @@ Check wether the history is modified. If so, emit warning.
 def check_health():
     pass
 
-class database_binding():
+class database_binding:
     sql = []
     raw_data_flight = raw_data_train = raw_data_bus = []
     data_path = []

@@ -17,31 +17,8 @@ import mailer
 import log
 import time
 import copy
+from datab import database_binding
 from log import log_file
-from enum import Enum
-
-'''
-Define the different vehicles
-'''
-class vehicle(Enum):
-    flight = 0
-    train = 1
-    bus = 2
-
-'''
-It is a class of one path which contains the source, destination, distance,
-starting time and so on.
-'''
-class router_path:
-    def __init__(self, source, destination, num, mode,travel_time, distance, price, start_time):
-        self.source = source
-        self.destination = destination
-        self.num = num
-        self.mode = mode
-        self.travel_time = travel_time
-        self.distance = distance
-        self.price = price
-        self.start_time = time.strptime(start_time, '%H:%M')
 
 
 '''
@@ -175,20 +152,17 @@ class router_module():
     ablishing user history.
     '''
     def __init__(self, core_mail_binding, database_binding):
-        self.data_all = database_binding.data_all
+        self.data_path = database_binding.data_path
 
     def minimal_cost_path(self,id_src, id_dest):
-            return minimal_path(self.data_all, id_src,id_dest, 'price')
+            return minimal_path(self.data_path, id_src,id_dest, 'price')
 
     def minimal_time_path(self, id_src, id_dest):
-        return minimal_path(self.data_all, id_src, id_dest, 'time')
+        return minimal_path(self.data_path, id_src, id_dest, 'time')
 
     def restricted_minimal_cost_path(self, id_src, id_dest, restrict):
-        return minimal_cost_restricted(self.data_all, id_src, id_dest, restrict)
+        return minimal_cost_restricted(self.data_path, id_src, id_dest, restrict)
 
 if(__name__ == '__main__'):
-    pass
-    # database = database_binding()
-    # minimal_path_restricted(database.data_all, 1, 5, 120, 'price')
-    # path = Path(0, 1, 'CA002/003', 1200, 500, 600, '8:00')
-    # print(path.start_time > time.strptime('7:00', '%H:%M'))
+    database = database_binding()
+    minimal_path_restricted(database.data_path, 1, 5, 120, 'price')
