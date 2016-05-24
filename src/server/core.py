@@ -76,7 +76,7 @@ class core_domain():
     '''interprete the request command into actual functions'''
     def command_interpreter(self,cmd):
         def nil (*arg):
-            return "ERROR COMMAND"
+            return "ERROR COMMAND:"+str(arg)
         if cmd=='mtp':
             return self.scprotocol.mtp
         elif cmd=='mcp':
@@ -115,7 +115,7 @@ class core_domain():
     def core_machine(self):
 
         while True:
-            #time.sleep(0.0001)             #...
+            time.sleep(0.1)             #i have to slow down the core machine.
             if self.core_machine_status=='accept-all':
                 if self.cmail.check('tag')=='transmitter':
                     self.transmit_back()
@@ -283,7 +283,7 @@ class shelled_core(core_domain):
 if __name__=='__main__':
     mode=0
     if mode==0:
-        shelled_core().init_core().monitor()
+        shelled_core().init_core()#.monitor()
     else:
         #for clean testing.
         a=core_domain()

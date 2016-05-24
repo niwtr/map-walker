@@ -299,15 +299,21 @@ class transmit_env():
 
         
     def cmd_evaluator(self,cmd,MASS):
+
         cmd=cmd.split('::')        #seperate the command by double-colons
         command=cmd[0]             #the first element should be command. 
         if(len(cmd)<2):
             pkt=transmitter_packet(MASS, self.interpreter(command), ())
             return pkt
         else:
-            args=tuple(eval(cmd[1]))   #the argument list, tupled
-            pkt=transmitter_packet(MASS,self.interpreter(command),args)   #pack up the message.
-            return pkt
+            try:
+                args=tuple(eval(cmd[1]))   #the argument list, tupled
+                pkt=transmitter_packet(MASS,self.interpreter(command),args)   #pack up the message.
+            except:
+                pkt=transmitter_packet(MASS, self.interpreter("err"), cmd)
+            finally:
+                return pkt
+            
     
     def shutdown_MASS(self, com):
         isFound=False
@@ -370,10 +376,14 @@ class transmit_env():
                 data=MASS.sock.recv(1024)         
 		
             except OSError:
+                MASS.unbound_server()
+                prinw("Encounter OS error.")
+                
                 break                       #Broken pipe, server shutted down 
 
 		
-            time.sleep(MASS.speed)          #this sleep time is essential.
+            #time.sleep(MASS.speed)          #this sleep time is essential.
+            #well.. never look back at such thing. this could cause a packet to fail.
 
             ddata=data.decode('utf-8')
 
@@ -391,10 +401,17 @@ class transmit_env():
                 self.tmail.send(self.cmail, lambda x:x, pkt)  
                                             #send the function prompt to the core.
                 wait_for_event()            #wait for the respond of the core.
+            self.tmail.pread()
+#            self.tmail.pread_all()           #execute all the mails.
                 
-
-
-            self.tmail.pread_all()           #execute all the mails.
+    '''
+For safety, we have to use the pread() instead of the pread_all.
+the pread_all is almost too fast and may cause two packets sent in a time.
+    
+    '''
+                
+            
+         
 
 
 
