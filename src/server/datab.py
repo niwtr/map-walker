@@ -31,7 +31,7 @@ class router_path:
         self.destination = destination
         self.num = num
         self.mode = mode
-        self.travel_time = travel_time
+        self.travel_time = time.strptime(travel_time, '%H:%M')
         self.distance = distance
         self.price = price
         self.start_time = time.strptime(start_time, '%H:%M')
@@ -69,24 +69,28 @@ def datab_process_data(raw_data_flight, raw_data_train, raw_data_bus):
     mode = [vehicle.flight, vehicle.train, vehicle.bus]
     for i in range(3):
         for element in raw_data[i]:
-            #convert time format to integer
-            temp_int = 0
+            #convert time format
             temp_string = element[6]
+            hour = '0'
+            minute = '0'
             if(temp_string.find('h') != -1):
-                temp_int += int(temp_string.split('h')[0]) * 60
+                hour = temp_string.split('h')[0]
                 temp_string = temp_string.split('h')[1]
             if(temp_string.find('m') != -1):
-                temp_int += int(temp_string.split('m')[0])
+                minute = temp_string.split('m')[0]
+            travel_time = hour + ':' + minute
 
+            #convert the start time format
             fm = re.compile(r'\d{1,2}:\d\d')
             if(element[9]):
                 ans = fm.findall(element[9])
             else:
                 ans = []
             for j in ans:
-                new_path = router_path(element[2], element[4], element[1], mode[i], temp_int, element[7], element[8], j)
-            data_path[int(element[3])-1][int(element[5])-1].append(new_path)
-            data_path[int(element[5])-1][int(element[3])-1].append(new_path)
+                new_path_l = router_path(element[2], element[4], element[1], mode[i], travel_time, element[7], element[8], j)
+                new_path_r = router_path(element[4], element[2], element[1], mode[i], travel_time, element[7], element[8], j)
+                data_path[int(element[3])-1][int(element[5])-1].append(new_path_l)
+                data_path[int(element[5])-1][int(element[3])-1].append(new_path_r)
     return data_path
 
 '''
