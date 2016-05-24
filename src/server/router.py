@@ -15,11 +15,10 @@ Design: Heranort, L.Laddie
 
 import mailer
 import log
-#import datab
-from datab import database_binding
+import time
 import copy
+from datab import database_binding
 from log import log_file
-
 
 
 '''
@@ -38,9 +37,9 @@ For example: minimal_path(data_all, 0, [1, 5, 9], 'price')
 ################################################################################
 '''
 def minimal_path(datab_link, source, destination, mode):
-    dat_flight = datab_link['flight'][mode]
-    dat_train = datab_link['train'][mode]
-    dat_bus = datab_link['bus'][mode]
+    dat_flight = datab_link['flight']
+    dat_train = datab_link['train']
+    dat_bus = datab_link['bus']
     minimal = [[[-1 for i in range(2)] for i in range(10)] for i in range(10)]
     #cmt: the 0th level denotes the val, the 1th level denotes the mean of transportation.
     inf = 100000   #set a infite value
@@ -153,17 +152,17 @@ class router_module():
     ablishing user history.
     '''
     def __init__(self, core_mail_binding, database_binding):
-        self.data_all=database_binding.data_all
+        self.data_path = database_binding.data_path
 
     def minimal_cost_path(self,id_src, id_dest):
-        return minimal_path(self.data_all, id_src,id_dest, 'price')
+            return minimal_path(self.data_path, id_src,id_dest, 'price')
 
     def minimal_time_path(self, id_src, id_dest):
-        return minimal_path(self.data_all, id_src, id_dest, 'time')
+        return minimal_path(self.data_path, id_src, id_dest, 'time')
 
     def restricted_minimal_cost_path(self, id_src, id_dest, restrict):
-        return minimal_cost_restricted(self.data_all, id_src, id_dest, restrict)
+        return minimal_cost_restricted(self.data_path, id_src, id_dest, restrict)
 
 if(__name__ == '__main__'):
     database = database_binding()
-    minimal_path_restricted(database.data_all, 1, 5, 120, 'price')
+    minimal_path_restricted(database.data_path, 1, 5, 120, 'price')

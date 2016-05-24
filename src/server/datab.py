@@ -9,8 +9,32 @@ and log.
 Design: Heranort, L.Laddie
 '''
 
-import sqlite3, os
+import sqlite3, os, re, time
 from log import log_file
+from enum import Enum
+
+'''
+Define the different vehicles
+'''
+class vehicle(Enum):
+    flight = 0
+    train = 1
+    bus = 2
+
+'''
+It is a class of one path which contains the source, destination, distance,
+starting time and so on.
+'''
+class router_path:
+    def __init__(self, source, destination, num, mode,travel_time, distance, price, start_time):
+        self.source = source
+        self.destination = destination
+        self.num = num
+        self.mode = mode
+        self.travel_time = travel_time
+        self.distance = distance
+        self.price = price
+        self.start_time = time.strptime(start_time, '%H:%M')
 
 '''
 Connect to the database.
@@ -37,50 +61,33 @@ def datab_get_raw_data(sql):
     return (raw_data_flight, raw_data_train, raw_data_bus)
 
 '''
-Process the raw data.
+Process the raw data to one list
 '''
-def datab_process_data(raw_data):
-    data_price = [[[] for i in range(10)] for i in range(10)]
-    data_time = [[[] for i in range(10)] for i in range(10)]
-    data_distance = [[[] for i in range(10)] for i in range(10)]
-    for element in raw_data:
-        data_price[int(element[3])-1][int(element[5])-1].append(element[8])
-        data_price[int(element[5])-1][int(element[3])-1].append(element[8])
+def datab_process_data(raw_data_flight, raw_data_train, raw_data_bus):
+    data_path = [[[] for i in range(10)] for i in range(10)]
+    raw_data = [raw_data_flight, raw_data_train, raw_data_bus]
+    mode = [vehicle.flight, vehicle.train, vehicle.bus]
+    for i in range(3):
+        for element in raw_data[i]:
+            #convert time format to integer
+            temp_int = 0
+            temp_string = element[6]
+            if(temp_string.find('h') != -1):
+                temp_int += int(temp_string.split('h')[0]) * 60
+                temp_string = temp_string.split('h')[1]
+            if(temp_string.find('m') != -1):
+                temp_int += int(temp_string.split('m')[0])
 
-        #convert time format to integer
-        temp_int = 0
-        temp_string = element[6]
-        if(temp_string.find('h') != -1):
-            temp_int += int(temp_string.split('h')[0]) * 60
-            temp_string = temp_string.split('h')[1]
-        if(temp_string.find('m') != -1):
-            temp_int += int(temp_string.split('m')[0])
-
-        data_time[int(element[3])-1][int(element[5])-1].append(temp_int)
-        data_time[int(element[5])-1][int(element[3])-1].append(temp_int)
-
-        data_distance[int(element[3])-1][int(element[5])-1].append(element[1])
-        data_distance[int(element[5])-1][int(element[3])-1].append(element[1])
-    lis = {'price': data_price, 'time': data_time, 'distance': data_distance}
-    return lis
-
-'''
-Get the name of station id
-'''
-def datab_get_name(raw_data):
-    data_name = [-1 for i in range(10)]
-    for element in raw_data:
-        data_name[int(element[3]) - 1] = element[2]
-        data_name[int(element[5]) - 1] = element[4]
-    return data_name
-
-'''
-Mix all the different transportation to one data list
-'''
-def datab_mix_all(data_flight, data_train, data_bus):
-    data_all = {'flight': data_flight, 'train': data_train, 'bus': data_bus}
-    log_file.info('database successfully processed')
-    return data_all
+            fm = re.compile(r'\d{1,2}:\d\d')
+            if(element[9]):
+                ans = fm.findall(element[9])
+            else:
+                ans = []
+            for j in ans:
+                new_path = router_path(element[2], element[4], element[1], mode[i], temp_int, element[7], element[8], j)
+            data_path[int(element[3])-1][int(element[5])-1].append(new_path)
+            data_path[int(element[5])-1][int(element[3])-1].append(new_path)
+    return data_path
 
 '''
 Check wether the history is modified. If so, emit warning.
@@ -88,34 +95,19 @@ Check wether the history is modified. If so, emit warning.
 def check_health():
     pass
 
-class database_binding():
-    sql=[]
-    raw_data_flight=raw_data_train=raw_data_bus=[]
-    data_flight=[]
-    data_train=[]
-    data_bus=[]
-    data_all=[]
-    data_name=[]
+class database_binding:
+    sql = []
+    raw_data_flight = raw_data_train = raw_data_bus = []
+    data_path = []
+
     def __init__(self):
         self.sql = connect_to_datab()
         (self.raw_data_flight, self.raw_data_train, self.raw_data_bus) = datab_get_raw_data(self.sql)
-        self.data_flight = datab_process_data(self.raw_data_flight)
-        self.data_train = datab_process_data(self.raw_data_train)
-        self.data_bus = datab_process_data(self.raw_data_bus)
-        self.data_all = datab_mix_all(self.data_flight, self.data_train, self.data_bus)   #the final data
-        self.data_name = datab_get_name(self.raw_data_train)  #station_name    
-        
-    
+        self.data_path = datab_process_data(self.raw_data_flight, self.raw_data_train, self.raw_data_bus)
 
 if(__name__ == '__main__'):
-    pass
-    '''
     sql = connect_to_datab()
     (raw_data_flight, raw_data_train, raw_data_bus) = datab_get_raw_data(sql)
-    data_flight = datab_process_data(raw_data_flight)
-    data_train = datab_process_data(raw_data_train)
-    data_bus = datab_process_data(raw_data_bus)
-    data_all = datab_mix_all(data_flight, data_train, data_bus)   #the final data
-    data_name = datab_get_name(raw_data_train)  #station_name
-    '''
- 
+    data_path = datab_process_data(raw_data_flight, raw_data_train, raw_data_bus)
+    for element in data_path[0][1]:
+        print(element.mode)
