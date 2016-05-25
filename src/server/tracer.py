@@ -13,6 +13,7 @@ Making travel simulation.
 import mailer
 import log
 import datetime
+import copy
 from router import router_module
 from datab import database_binding
 
@@ -45,6 +46,7 @@ def translata(raw_pathl):
         acc.append([obj.source, obj.destination,
                     obj.num,obj.mode, obj.travel_time,
                     obj.distance, obj.price, dtoi(obj.start_time)])
+
     return acc
     
 
@@ -57,8 +59,8 @@ def calc_cur_cord(source, dest, timepercent):
     dx=get_coordinate(dest)[0]
     dy=get_coordinate(dest)[1]
     return [
-        sx+(dx-sx)*timepercent,
-        sy+(dy-sy)*timepercent
+        round(sx+(dx-sx)*timepercent, 2),
+        round(sy+(dy-sy)*timepercent, 2)
     ]
 
 ''' [source, destination, num,
@@ -80,14 +82,14 @@ def add_day(datime, day):
     return datime
     
 def datetime_modifier(pathl):
-    last_start_time=datetime.datetime
-    last_travel_time=datetime.datetime
+    last_start_time=[]#datetime.datetime
+    last_travel_time=[]#datetime.datetime
     day_plus=0 #day increasement.
     first_time=True   #in the first time we should not modify the date, see it as a principle
     for hop in pathl:
         if(not first_time):
             #if(hop[7].hour<last_start_time.hour): #overnight #old implementation
-            if((hop[7]%day_weight)<(last_start_time%day_weight)):   #overnight.
+            if((hop[7]%day_weight)<=(last_start_time%day_weight)):   #overnight.
                 day_plus+=1
         hop[7]=add_day(hop[7], day_plus)
         last_start_time=hop[7]
@@ -97,31 +99,34 @@ def datetime_modifier(pathl):
 
 
 
-def calc_total_time(pathl): #calculate the total time for a path list.
-    pathl=translata(pathl)
-    datetime_modifier(pathl)
-    dest=pathl[-1][1]
+def calc_end_time(pathl): #calculate the total time for a path list.
+#    pathl=translata(pathl)
+    pathu=copy.deepcopy(pathl)
+    datetime_modifier(pathu)
+    dest=pathu[-1][1]
     acc=0
     for [source, destination, num,
          mode,travel_time, distance, 
-         price, start_time] in pathl:    
+         price, start_time] in pathu:    
         #start_time=dtoi(start_time)     #old implementation.
         if(destination==dest):
-            print(start_time)
             acc+=start_time+travel_time
     return acc
-        
+
+def calc_start_time(pathl):
+    #pathl=translata(pathl)
+    return pathl[0][7]
 
 dtoi=lambda datime:datime.minute+datime.hour*hour_weight+datime.day*day_weight
 
 def trace(cur_time, pathl):  #curtime should be int.
-    pathl=translata(pathl)
+    pathu=copy.deepcopy(pathl)
     curtime=cur_time
-    datetime_modifier(pathl)
+    datetime_modifier(pathu)
 
     for [source, destination, num,
          mode,travel_time, distance, 
-         price, start_time] in pathl:
+         price, start_time] in pathu:
         
         #start_time=dtoi(start_time)   #old implementation.
         '''
@@ -150,7 +155,14 @@ rt=router_module(0, database)
 
 
 #test suite.
-for i in range (4320, 7964, 10):
-    print(trace(i,rt.minimal_time_path(1, [2,3,4])))
+path=rt.minimal_time_path(1,[2,3,4,5,6])   #bind path.
+pathl=translata(path)  #translate the path into human readable
+for i in range (calc_start_time(pathl),calc_end_time(pathl), 10):
+    #trace starts from calc_start_time(path), ends at calc_end_time(path)
+    print(trace(i,pathl))
 
-calc_total_time(rt.minimal_time_path(1,[2,3,4]))
+print(calc_start_time(pathl))
+
+print(calc_end_time(pathl))
+
+
