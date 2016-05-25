@@ -87,8 +87,8 @@ def datab_process_data(raw_data_flight, raw_data_train, raw_data_bus):
             else:
                 ans = []
             for j in ans:
-                new_path_l = router_path(element[2], element[4], element[1], mode[i], travel_time, element[7], element[8], j)
-                new_path_r = router_path(element[4], element[2], element[1], mode[i], travel_time, element[7], element[8], j)
+                new_path_l = router_path(element[3], element[5], element[1], mode[i], travel_time, element[7], element[8], j)
+                new_path_r = router_path(element[5], element[3], element[1], mode[i], travel_time, element[7], element[8], j)
                 data_path[int(element[3])-1][int(element[5])-1].append(new_path_l)
                 data_path[int(element[5])-1][int(element[3])-1].append(new_path_r)
     return data_path
