@@ -27,43 +27,6 @@ The history maybe used twice for reference of path recommendation.
 def emit_to_history(route):
     pass
 
-def minimal_cost_restricted(datab_link, source, destination, restrict):
-    def dist(v1, v2, mode, mean):
-        meandict={0:'flight', 1:'train', 2:'bus'}
-        return datab_link[meandict[mean]][mode][v1][v2][0]
-
-    def tdist(v1, v2, mean):
-        return dist(v1, v2, 'time', mean)
-
-    def cdist(v1, v2, mean):
-        return dist(v1, v2, 'price', mean)
-
-def minimal_path_restricted(datab_link, source,destination, limit, mode):
-    data_flight_time = datab_link['flight']['time']
-    data_flight_price = datab_link['flight']['price']
-    city_num = len(data_flight_time)
-    dp = [[-1 for i in range(10)] for i in range(limit+1)]
-    for i in range(9, -1, -1):
-        for j in range(limit + 1):
-            if(data_flight_time[source][i] and data_flight_time[source][i][0] <= j):
-                dp[j][i] = data_flight_price[source][i][0]
-
-    for i in range(10):
-        for l in range(limit + 1):
-            if(data_flight_time[source][i] and l >= data_flight_time[source][i][0]):
-                dp[l][i] = min(dp[l][i], dp[l - data_flight_time[source][i][0]][i] + data_flight_price[source][i][0])
-
-    for i in range(10):
-        for j in range(limit+1):
-            print(dp[j][i], end=' ')
-        print('')
-
-def transfer(date_time):
-    temp_time = date_time % (24 * 60)
-    hour = temp_time / 60
-    minute = temp_time % 60
-    temp_time = str(int(hour)) + ':' + str(int(minute))
-    return datetime.datetime.strptime(temp_time, '%H:%M')
 
 '''
 ################################################################################
@@ -141,6 +104,31 @@ class router_module:
         min_path = [[] for i in range(10)]
         inf = 1000000
 
+        #transfer the time to datatime format
+        def transfer(date_time):
+            temp_time = date_time % (24 * 60)
+            hour = temp_time / 60
+            minute = temp_time % 60
+            temp_time = str(int(hour)) + ':' + str(int(minute))
+            return datetime.datetime.strptime(temp_time, '%H:%M')
+
+        #dynamic find the next minimal path
+        def dyn_find_next(i, j, last_time):
+            min_temp = inf
+            temp_path = []
+            for element in self.data_path[i][j]:
+                payload = 0
+                if(element.start_time > last_time[i]):
+                    temp_time = element.start_time - last_time[i]
+                    payload = temp_time.seconds / 60
+                else:
+                    temp_time = last_time[k] - element.start_time
+                    payload = 24 * 60 - (temp_time.seconds / 60)
+                if(min_temp > element.travel_time + payload):
+                    min_temp = element.travel_time + payload
+                    temp_path = element
+            return (min_temp, temp_path)
+
         #Prepare the data before dijkstra
         for j in range(10):
             min_temp = inf
@@ -150,11 +138,12 @@ class router_module:
                     min_path[j] = k
 
         #dijkstra algorithm
-        final = [False for i in range(10)]
-        path = [[] for i in range(10)]
-        dis = [inf for i in range(10)]
-        last_time = [[] for i in range(10)]
+        final = [False for i in range(10)]  #whether finding the minimal path to city i
+        path = [[] for i in range(10)]      #the path from source to city i
+        dis = [inf for i in range(10)]      #the time offset when arrive city i
+        last_time = [[] for i in range(10)]     #the clock when arrive the city i
 
+        #initialize the variables
         for i in range(10):
             if(min_path[i]):
                 dis[i] = min_path[i].travel_time
@@ -165,6 +154,7 @@ class router_module:
         k = -1     #the last arrive city id
         for i in range(9):
             k = -1
+
             min_temp = inf     #find the minimal dis[j]
             for j in range(10):
                 if(final[j] == False and dis[j] < min_temp):
@@ -176,40 +166,16 @@ class router_module:
                 destination.remove(k)
                 if(not destination):    #find all the demand city
                     break
-                for i in range(10):     #from the last demand city to find others
-                    if(i != k):
-                        min_temp = inf
-                        temp_path = []
-                        for element in self.data_path[k][i]:
-                            payload = 0
-                            if(element.start_time > last_time[k]):
-                                temp_time = element.start_time - last_time[k]
-                                payload = temp_time.seconds/60
-                            else:
-                                temp_time = last_time[k] - element.start_time
-                                payload = 24 * 60 - (temp_time.seconds / 60)
-                            if(min_temp > element.travel_time + payload):
-                                min_temp = element.travel_time + payload
-                                dis[i] = min_temp + dis[k]
-                                temp_path = element
-                        path[i] = copy.deepcopy(path[k])
-                        path[i].append(temp_path)
-                        last_time[i] = transfer(dis[i])
+                for q in range(10):     #from the last demand city to find others
+                    if(q != k):
+                        (min_temp, temp_path) = dyn_find_next(k, q, last_time)
+                        dis[q] = min_temp + dis[k]
+                        path[q] = copy.deepcopy(path[k])
+                        path[q].append(temp_path)
+                        last_time[q] = transfer(dis[q])
 
             for w in range(10):   #from the select city to update others
-                min_temp = inf
-                temp_path = []
-                for element in self.data_path[k][w]:
-                    payload = 0
-                    if(element.start_time > last_time[k]):
-                        temp_time = element.start_time - last_time[k]
-                        payload = temp_time.seconds / 60
-                    else:
-                        temp_time = last_time[k] - element.start_time
-                        payload = 24 * 60 - (temp_time.seconds / 60)
-                    if(min_temp > element.travel_time + payload):
-                        min_temp = element.travel_time + payload
-                        temp_path = element
+                (min_temp, temp_path) = dyn_find_next(k, w, last_time)
                 if(final[w] == False and temp_path and (dis[k] + min_temp < dis[w])):
                     dis[w] = dis[k] + min_temp
                     path[w] = copy.deepcopy(path[k])
@@ -217,12 +183,43 @@ class router_module:
                     last_time[w] = transfer(dis[w])
         return path[k]
 
-    def restricted_minimal_cost_path(self, id_src, id_dest, restrict):
-        return minimal_cost_restricted(self.data_path, id_src, id_dest, restrict)
+    def restricted_minimal_cost_path(self, source, destination, restrict):
+        restrict_data_path = [[[] for i in range(10)] for i in range(10)]
+        for i in range(10):
+            for j in range(10):
+                for element in self.data_path[i][j]:
+                    if(element.travel_time <= restrict):
+                        restrict_data_path[i][j].append(element)
+
+        inf = 10000000
+        path = [[] for i in range(10)]
+        dp = [[0 for i in range(10)] for i in range(restrict+1)]
+        for i in range(restrict + 1):
+            if(i > 0):
+                for j in range(10):
+                    for ele_path in path[j]:
+                        for ele_data in restrict_data_path[source][j]:
+                            pass
+
+        # for i in range(9, -1, -1):
+        #     for j in range(restrict + 1):
+        #         if(data_flight_time[source][i] and data_flight_time[source][i][0] <= j):
+        #             dp[j][i] = data_flight_price[source][i][0]
+        #
+        # for i in range(10):
+        #     for l in range(restrict + 1):
+        #         if(data_flight_time[source][i] and l >= data_flight_time[source][i][0]):
+        #             dp[l][i] = min(dp[l][i], dp[l - data_flight_time[source][i][0]][i] + data_flight_price[source][i][0])
+        #
+        # for i in range(10):
+        #     for j in range(restrict+1):
+        #         print(dp[j][i], end=' ')
+        #     print('')
 
 if(__name__ == '__main__'):
     database = database_binding()
     router_path = router_module(0 ,database)
-    path = router_path.minimal_time_path(0, [1, 2])
+    path = router_path.minimal_time_path(9, [1, 2, 3, 4, 5, 6])
     for element in path:
         print(element.source, element.destination, element.mode, element.price, element.travel_time, element.start_time)
+    # restrict_path = router_path.restricted_minimal_cost_path(0, [1, 2], 300)
