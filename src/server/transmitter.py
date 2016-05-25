@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 '''
-Current version : 0.3
-2016-3-26
+Current version : 0.4
+2016-5-25
 by Heranort 
 '''
 
@@ -464,6 +464,7 @@ the pread_all is almost too fast and may cause two packets sent in a time.
     def seq_start(self):
         def mass_counter():
             while(1):
+
                 num=0
                 for mass in self.MASSES:
                     if (mass.sock_thread.isAlive()):
@@ -472,7 +473,7 @@ the pread_all is almost too fast and may cause two packets sent in a time.
                     self.MASSN=1
                 else:
                     self.MASSN=num
-
+                
                 time.sleep(1)
             
         

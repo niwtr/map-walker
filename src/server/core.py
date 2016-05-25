@@ -94,7 +94,6 @@ class core_domain():
             return self.tracer.calc_end_time
         elif cmd=='echo':
             return lambda x:x
-
         else :
             return nil
         
@@ -123,7 +122,7 @@ class core_domain():
     def core_machine(self):
 
         while True:
-      
+            
             time.sleep(0.1) #cowsay:original 0.1             #i have to slow down the core machine.
 
             if self.core_machine_status=='accept-all':
@@ -159,15 +158,17 @@ class shelled_core(core_domain):
         self.tty_rows, self.tty_columns = os.popen('stty size', 'r').read().split()            
         self.tty_rows=int(self.tty_rows)
         self.tty_columns=int(self.tty_columns)	        
-
+        self.status='main'
+        self.__event=False
         
     
     def init_core(self):
         self.initialize_env()
         self.start_transmitter()
         self.run()
+        threading.Thread(target=self.input_listener).start()
+        
         return self
-    
     
     def prinl(self,c):
         for i in range(0, self.tty_columns):
@@ -219,22 +220,41 @@ class shelled_core(core_domain):
         else: 
             print('IDLE')
 
+
+    def input_listener(self):
+        while 1:
+            if select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []):
+                c = sys.stdin.read(1)
+                
+                if c == '\x1b' or c=='q': 
+                    self.status='exit'
+                    break
+    
+                elif c=='k': self.status='kill'
+    
+                elif c=='m': self.status='server monitor'
+                
+                elif c=='o': self.status='main'
+                
+                elif c=='t': self.status='tmail'
+                
+                elif c=='c': self.status='cmail'    
+                
+                elif c==' ': pass
+                self.__event=True
+        
     def monitor(self):
 
         old_settings = termios.tcgetattr(sys.stdin)
         tty.setcbreak(sys.stdin.fileno())        
 
-        status='main'
-
         while True:
-            sys.stdout.flush()
-            time.sleep(0.1)
-            os.system("clear")
 
-            if status=='main': 
+
+            if self.status=='main': 
                 self.main_interface()
                 
-            elif status=='server monitor':
+            elif self.status=='server monitor':
                 self.prinl('-')
                 print('Server monitor.')
                 self.prinl('-')
@@ -243,8 +263,10 @@ class shelled_core(core_domain):
                 print('Pass o to return to main interface.')
                 self.prinl('-')
                  
+            elif self.status=='exit':                
+                break
                 
-            elif status=='kill':
+            elif self.status=='kill':
                 termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
                 com=int(input("Type the com of the server: "))
                 sucp=self.transmitter.shutdown_MASS(com)
@@ -252,35 +274,20 @@ class shelled_core(core_domain):
                     print('Could not find server %s' % str(com))
                 else: 
                     print('Server %s shutted down.' % str(com))
-                status='main'            
+                self.status='main'            
                 tty.setcbreak(sys.stdin.fileno())  
                 
-            elif status=='cmail':
+            elif self.status=='cmail':
                 self.mailbox_monitor_interface(self.cmail)
 
-            elif status=='tmail':
+            elif self.status=='tmail':
                 self.mailbox_monitor_interface(self.transmitter.tmail)
                 
-            if select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []):
-                c = sys.stdin.read(1)
-                if c == '\x1b' or c=='q': 
-                    #restore old tty setting
-                    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-                    self.shut_down()        #currently no work.
-                    os._exit(0)             #shutdown completely.                    
-                    print('bye.')
-                    break
-
-                elif c=='k': status='kill'
-
-                elif c=='m': status='server monitor'
-                
-                elif c=='o': status='main'
-                
-                elif c=='t': status='tmail'
-                
-                elif c=='c': status='cmail'
-
+            sys.stdout.flush()
+            while(not self.__event and self.status!='exit'):
+                time.sleep(0.01)
+            self.__event=False
+            os.system("clear")            
 
         #restore old tty setting
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
@@ -294,7 +301,8 @@ class shelled_core(core_domain):
 if __name__=='__main__':
     mode=0
     if mode==0:
-        shelled_core().init_core()#.monitor()
+        shelled_core().init_core().monitor()
+        
     else:
         #for clean testing.
         a=core_domain()
