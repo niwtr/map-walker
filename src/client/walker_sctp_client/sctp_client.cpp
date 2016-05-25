@@ -87,26 +87,28 @@ void sctp_client::extract_element_from_plain_list(pyl python_list, vpyl& elemv) 
     this->split_by_comma(python_list, elemv);
 }
 
-void sctp_client::query_parser(pyl originl, ivector &container) {
+void sctp_client::plain_pylist_extractor(pyl originl, ivector &container) {
     vpyl v;
     originl=parenthesis_smasher(originl, true);
     this->extract_element_from_plain_list(originl, v);
     for(auto x : v){
         container.emplace_back(std::stoi(x));
     }
+
 }
 
-void sctp_client::query_all_parser(pyl origin, imatrix &matrix) {
+void sctp_client::matrix_pylist_extractor(pyl origin, imatrix &matrix) {
     origin=parenthesis_smasher(filter_space(origin), false);
     vpyl lypv;
     origin=this->square_remover(origin);
     extract_sublists(origin, lypv);
     for (auto ppyl : lypv){
         ivector vi;
-        query_parser(ppyl, vi);
+        plain_pylist_extractor(ppyl, vi);
         matrix.emplace_back(vi);
     }
 }
+/*
 void sctp_client::path_parser(pyl origin, imatrix & path_list, int &time, int & cost){
    origin=parenthesis_smasher(filter_space(origin), false);
     long index;
@@ -118,14 +120,14 @@ void sctp_client::path_parser(pyl origin, imatrix & path_list, int &time, int & 
     }
     auto the_path=origin.substr(0, index);
     auto tac="["+origin.substr(index+1, origin.length()-1)+"]";
-    query_all_parser(the_path, path_list);
+    matrix_pylist_extractor(the_path, path_list);
     ivector v;
-    query_parser(tac, v);
+    plain_pylist_extractor(tac, v);
     time=v[0];
     cost=v[1];
 }
 
-
+*/
 /*test
 int main(int argc, const char * argv[]) {
     sctp_client sc;
@@ -134,10 +136,10 @@ int main(int argc, const char * argv[]) {
     pyl t="([[1,2],[2,2],[3,2], 4,-1]], 711,310)"; //path
 
     ivector vi;
-    sc.query_parser(u, vi);
+    sc.plain_pylist_extractor(u, vi);
 
     imatrix matrix;
-    sc.query_all_parser(s, matrix);
+    sc.matrix_pylist_extractor(s, matrix);
 
     imatrix mat;
     int time, cost;

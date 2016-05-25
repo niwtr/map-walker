@@ -17,19 +17,20 @@ namespace  sctp {
     using ivector=vector<int>;
     class sctp_client {
 
-
-
     public:
-
-        void path_parser(pyl origin, imatrix &path_list, int &time, int & cost);
-
-        void query_parser(pyl originl, ivector &container);
-
-        void query_all_parser(pyl origin, imatrix &matrix);
-
-
-        void trace_parser();
-
+        /* parse plain python list into native C++ vector<int>.
+         * example:
+         * "[0, 1, 2, 3]" -->  vector<int>, its element being 0, 1 2 and 3.
+         */
+        void plain_pylist_extractor(pyl originl, ivector &container);
+        /* parse matrix list into native C++ vector<vector<int>>.
+         * example:
+         * [[0,1,2],[1,2,3],[2,3,4]]  --> vector<vector<int>>, you know.
+         */
+        void matrix_pylist_extractor(pyl origin, imatrix &matrix);
+        //old implementations:
+        //void trace_parser();
+        //void path_parser(pyl origin, imatrix &path_list, int &time, int & cost);
     private:
         void splitf(pyl s, std::string delim, vpyl &sv);
 
