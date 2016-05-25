@@ -52,6 +52,9 @@ class router_module:
     ################################################################################
     '''
     def minimal_cost_path(self, source, destination):
+        source -= 1
+        for i in range(len(destination)):
+            destination[i] -= 1
         min_path = [[[] for i in range(10)] for i in range(10)]
         inf = 1000000
 
@@ -101,6 +104,9 @@ class router_module:
         return path[k]
 
     def minimal_time_path(self, source, destination):
+        source -= 1
+        for i in range(len(destination)):
+            destination[i] -= 1
         min_path = [[] for i in range(10)]
         inf = 1000000
 
@@ -219,7 +225,7 @@ class router_module:
 if(__name__ == '__main__'):
     database = database_binding()
     router_path = router_module(0 ,database)
-    path = router_path.minimal_time_path(9, [1, 2, 3, 4, 5, 6])
+    path = router_path.minimal_time_path(1, [2, 3, 4, 5, 6])
     for element in path:
         print(element.source, element.destination, element.mode, element.price, element.travel_time, element.start_time)
     # restrict_path = router_path.restricted_minimal_cost_path(0, [1, 2], 300)
