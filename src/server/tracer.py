@@ -15,16 +15,16 @@ from router import router_module
 from datab import database_binding
 
 def get_coordinate(cityid):
-    cordict={1:(364, 444), 
-             2:(447, 278),
-             3:(555, 405), 
-             4:(612, 161), 
-             5:(719, 160), 
-             6:(713, 262),
-             7:(862, 181),
-             8:(774, 558),
-             9:(428, 788),
-             10:(100, 834)}
+    cordict={0:(364, 444), 
+             1:(447, 278),
+             2:(555, 405), 
+             3:(612, 161), 
+             4:(719, 160), 
+             5:(713, 262),
+             6:(862, 181),
+             7:(774, 558),
+             8:(428, 788),
+             9:(100, 834)}
     return cordict[cityid]
 
 
@@ -68,36 +68,87 @@ def datetime_modifier(pathl):
     last_travel_time=datetime.datetime
     first_time=True   #in the first time we should not modify the date, see it as a principle
     for hop in pathl:
-        if(first_time):
-            minita=(last_start_time.minute+last_travel_time.minute)//60 
-            if(last_start_time.hour+last_travel_time.hour+minita>24): #overnight
-                hop[7].day+=1
+        if(not first_time):
+            if(hop[7].hour<last_start_time.hour): #overnight
+                date=hop[7]
+                hour=date.hour
+                day=date.day+1
+                minute=date.minute
+                year=date.year
+                month=date.month
+                hop[7]=datetime.datetime(year, month, day,hour,minute)
         last_start_time=hop[7]
         last_travel_time=hop[4]
         first_time=False
 
+def total_time(pathl):
+    pathl=translata(pathl)
+    dest=pathl[-1][1]
+    acc=0
+    xtime=0
+    last_start_time=0
+    first_run=True
+    for [source, destination, num,
+         mode,travel_time, distance, 
+         price, start_time] in pathl:    
+        start_time=dtoi(start_time)
+        
+        if(first_run):
+            xtime=start_time
+            first_start_time=start_time
+            acc+=travel_time
+            first_run=False
+        else:
+            if(destination!=dest):
+                acc+=start_time-last_start_time
+            acc+=travel_time
+            last_start_time=start_time
+    return acc+xtime
+        
+
 def dtoi(datime):
+#    print("day: ",datime.day, "hour: ",datime.hour, "minute: ",datime.minute )
     return datime.minute+datime.hour*60+datime.day*3600
 
 def trace(cur_time, pathl):  #curtime should be int.
+   
     curtime=cur_time
-    
+    datetime_modifier(pathl)
     for [source, destination, num,
          mode,travel_time, distance, 
          price, start_time] in pathl:
-        if(curtime<dtoi(start_time)): #we are waiting in the bus station. the start_time is morphed into integer.
+        
+        start_time=dtoi(start_time)
+        '''
+        print("cur_time: " ,end='')
+        print(curtime)
+        print("start time: ", end='')
+        print (start_time)
+        print("travel time: ", end='')
+        print(travel_time)
+        print("")
+        '''
+        print(start_time)
+        if(curtime<start_time): #we are waiting in the bus station. the start_time is morphed into integer.
             return calc_cur_cord(source, destination, 0)
-        if(curtime<dtoi(start_time)+travel_time):
-            tperc=(curtime-dtoi(start_time))/travel_time
+        if(curtime<=start_time+travel_time):
+            tperc=(curtime-start_time)/travel_time
             return calc_cur_cord(source, destination, tperc)
+        
         else : #curtime>start_time+travel_time. this implies we are on next hop.
             curtime=curtime+travel_time
     
+    
 database=database_binding()
 rt=router_module(0, database)
-trace(1,translata(rt.minimal_time_path(1, [2,3,4])))
 
+for obj in rt.minimal_time_path(1, [2,3,4]):
+    print(obj.source, obj.destination, obj.mode, dtoi(obj.start_time))
 
+#for i in range (4320, 8000, 10):
+#    print(trace(i,translata(rt.minimal_time_path(1, [2,3,4]))))
+
+print(total_time(rt.minimal_time_path(1, [2,3,4])))
 
 
 
