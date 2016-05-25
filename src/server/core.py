@@ -20,10 +20,11 @@ import time
 import mailer
 from datab import database_binding
 from router import router_module
-from textprotocol import scprotocol
+#from textprotocol import scprotocol
 from transmitter import transmit_env
 from transmitter import transmitter_packet
 from log import log_file
+from tracer import tracer_module
 
 import termios
 import tty
@@ -63,6 +64,8 @@ class core_domain():
         self.database=database_binding()
         '''INIT ROUTER MODULE'''
         self.router=router_module(self.cmail, self.database)        
+        '''INIT TRACER MODULE'''
+        self.tracer=tracer_module()
         '''INIT TRANSMITTER ENVIRONMENT'''
         self.transmitter=transmit_env(self.cmail,self.command_interpreter)
 #        self.scprotocol=scprotocol(self.router, self.database)
@@ -83,12 +86,15 @@ class core_domain():
             return self.router.minimal_cost_path
         elif cmd=='rmcp':
             return self.router.restricted_minimal_cost_path
+        elif cmd=="trace":
+            return self.tracer.trace
+        elif cmd=="start-time":
+            return self.tracer.calc_start_time
+        elif cmd=="end-time":
+            return self.tracer.calc_end_time
         elif cmd=='echo':
             return lambda x:x
-#        elif cmd=="query":
-#            return self.scprotocol.query
-#        elif cmd=="query_all": #in this part, we must 
-#            return self.scprotocol.query_all
+
         else :
             return nil
         
@@ -288,7 +294,7 @@ class shelled_core(core_domain):
 if __name__=='__main__':
     mode=0
     if mode==0:
-        shelled_core().init_core().monitor()
+        shelled_core().init_core()#.monitor()
     else:
         #for clean testing.
         a=core_domain()

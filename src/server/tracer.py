@@ -42,6 +42,8 @@ This mechanism is used for word transmission.
 '''
 def translata(raw_pathl):    
     acc=[]
+    dtoi=lambda datime:datime.minute+datime.hour*hour_weight+datime.day*day_weight
+    
     for obj in raw_pathl:
         acc.append([obj.source, obj.destination,
                     obj.num,obj.mode, obj.travel_time,
@@ -99,70 +101,73 @@ def datetime_modifier(pathl):
 
 
 
-def calc_end_time(pathl): #calculate the total time for a path list.
-#    pathl=translata(pathl)
-    pathu=copy.deepcopy(pathl)
-    datetime_modifier(pathu)
-    dest=pathu[-1][1]
-    acc=0
-    for [source, destination, num,
-         mode,travel_time, distance, 
-         price, start_time] in pathu:    
-        #start_time=dtoi(start_time)     #old implementation.
-        if(destination==dest):
-            acc+=start_time+travel_time
-    return acc
-
-def calc_start_time(pathl):
-    #pathl=translata(pathl)
-    return pathl[0][7]
-
-dtoi=lambda datime:datime.minute+datime.hour*hour_weight+datime.day*day_weight
-
-def trace(cur_time, pathl):  #curtime should be int.
-    pathu=copy.deepcopy(pathl)
-    curtime=cur_time
-    datetime_modifier(pathu)
-
-    for [source, destination, num,
-         mode,travel_time, distance, 
-         price, start_time] in pathu:
-        
-        #start_time=dtoi(start_time)   #old implementation.
-        '''
-        #test:
-        print("cur_time: " ,end='')
-        print(curtime)
-        print("start time: ", end='')
-        print (start_time)
-        print("travel time: ", end='')
-        print(travel_time)
-        print("")
-        '''
-        if(curtime<start_time): #we are waiting in the bus station. the start_time is morphed into integer.
-            return calc_cur_cord(source, destination, 0)
-        if(curtime<=start_time+travel_time):
-            tperc=(curtime-start_time)/travel_time
-            return calc_cur_cord(source, destination, tperc)
-        
-        else : #curtime>start_time+travel_time. this implies we are on next hop.
-            
-            pass
+class tracer_module():
+    
+    def calc_end_time(self, pathl): #calculate the total time for a path list.
+    #    pathl=translata(pathl)
+        pathu=copy.deepcopy(pathl)
+        datetime_modifier(pathu)
+        dest=pathu[-1][1]
+        acc=0
+        for [source, destination, num,
+             mode,travel_time, distance, 
+             price, start_time] in pathu:    
+            #start_time=dtoi(start_time)     #old implementation.
+            if(destination==dest):
+                acc+=start_time+travel_time
+        return acc
+    
+    def calc_start_time(self, pathl):
+        #pathl=translata(pathl)
+        return pathl[0][7]
+    
 
     
-database=database_binding()
-rt=router_module(0, database)
+    def trace(self, cur_time, pathl):  #curtime should be int.
+        pathu=copy.deepcopy(pathl)
+        curtime=cur_time
+        datetime_modifier(pathu)
+    
+        for [source, destination, num,
+             mode,travel_time, distance, 
+             price, start_time] in pathu:
+            
+            #start_time=dtoi(start_time)   #old implementation.
+            '''
+            #test:
+            print("cur_time: " ,end='')
+            print(curtime)
+            print("start time: ", end='')
+            print (start_time)
+            print("travel time: ", end='')
+            print(travel_time)
+            print("")
+            '''
+            if(curtime<start_time): #we are waiting in the bus station. the start_time is morphed into integer.
+                return calc_cur_cord(source, destination, 0)
+            if(curtime<=start_time+travel_time):
+                tperc=(curtime-start_time)/travel_time
+                return calc_cur_cord(source, destination, tperc)
+            
+            else : #curtime>start_time+travel_time. this implies we are on next hop.
+                
+                pass
+    def __init__(self):
+        pass
 
 
+__enigma=False
+if __enigma:
+    tr=tracer_module()
+    database=database_binding()
+    rt=router_module(0, database)
 #test suite.
-path=rt.minimal_time_path(1,[2,3,4,5,6])   #bind path.
-pathl=translata(path)  #translate the path into human readable
-for i in range (calc_start_time(pathl),calc_end_time(pathl), 10):
-    #trace starts from calc_start_time(path), ends at calc_end_time(path)
-    print(trace(i,pathl))
-
-print(calc_start_time(pathl))
-
-print(calc_end_time(pathl))
-
-
+    path=rt.minimal_time_path(1,[2,3,4])   #bind path.
+    pathl=translata(path)  #translate the path into human readable
+    for i in range (tr.calc_start_time(pathl),tr.calc_end_time(pathl), 10):
+        #trace starts from calc_start_time(path), ends at calc_end_time(path)
+        print(tr.trace(i,pathl))
+    
+    print(tr.calc_start_time(pathl))
+    
+    print(tr.calc_end_time(pathl))

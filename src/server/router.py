@@ -17,7 +17,22 @@ import mailer
 import copy, datetime
 from datab import database_binding
 from log import log_file
+from datab import vehicle
+def translata(raw_pathl):  
+    day_weight=3600
+    hour_weight=60
+    minute_weight=1
+    moddict={vehicle.bus : 2,
+             vehicle.flight:0, 
+             vehicle.train:1}
+    acc=[]
+    dtoi=lambda datime:datime.minute+datime.hour*hour_weight+datime.day*day_weight
+    for obj in raw_pathl:
+        acc.append([obj.source, obj.destination,
+                    obj.num,moddict[obj.mode], obj.travel_time,
+                    obj.distance, obj.price, dtoi(obj.start_time)])
 
+    return acc
 
 '''
 Write the current route to history.
@@ -101,7 +116,7 @@ class router_module:
                     dis[w] = min_temp + min_path[k][w].price
                     path[w] = copy.deepcopy(path[k])
                     path[w].append(min_path[k][w])
-        return path[k]
+        return translata(path[k])
 
     def minimal_time_path(self, source, destination):
         source -= 1
@@ -187,7 +202,7 @@ class router_module:
                     path[w] = copy.deepcopy(path[k])
                     path[w].append(temp_path)
                     last_time[w] = transfer(dis[w])
-        return path[k]
+        return translata(path[k])
 
     def restricted_minimal_cost_path(self, source, destination, restrict):
         restrict_data_path = [[[] for i in range(10)] for i in range(10)]
