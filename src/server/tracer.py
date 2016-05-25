@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 '''
+################################################################################
 Tracer module.
 
 Making travel simulation.
+################################################################################
 '''
 
 
@@ -15,33 +17,34 @@ from router import router_module
 from datab import database_binding
 
 def get_coordinate(cityid):
-    cordict={0:(364, 444), 
-             1:(447, 278),
-             2:(555, 405), 
-             3:(612, 161), 
-             4:(719, 160), 
-             5:(713, 262),
-             6:(862, 181),
-             7:(774, 558),
-             8:(428, 788),
-             9:(100, 834)}
+    cordict={1:(364, 444), 
+             2:(447, 278),
+             3:(555, 405), 
+             4:(612, 161), 
+             5:(719, 160), 
+             6:(713, 262),
+             7:(862, 181),
+             8:(774, 558),
+             9:(428, 788),
+             10:(100, 834)}
     return cordict[cityid]
 
+day_weight=3600
+hour_weight=60
+minute_weight=1
 
-
-'''
-Get the path we need.
-'''
-def get_path(path):
-    pass
 
 #translates the original path list of objects into path list of lists.
-def translata(raw_pathl):
+'''
+Translate the raw path list (contain objects as element.) to the path list matrix.
+This mechanism is used for word transmission.
+'''
+def translata(raw_pathl):    
     acc=[]
     for obj in raw_pathl:
         acc.append([obj.source, obj.destination,
                     obj.num,obj.mode, obj.travel_time,
-                    obj.distance, obj.price, obj.start_time])
+                    obj.distance, obj.price, dtoi(obj.start_time)])
     return acc
     
 
@@ -62,64 +65,67 @@ def calc_cur_cord(source, dest, timepercent):
          mode,travel_time, distance, 
          price, start_time]'''
 
+def _add_day(datime, day):   #old implementation.
+    date=datime
+    hour=date.hour
+    day=date.day+day
+    minute=date.minute
+    year=date.year
+    month=date.month
+    datime=datetime.datetime(year, month, day,hour,minute)    
+    return datime
+
+def add_day(datime, day):
+    datime+=day*day_weight
+    return datime
     
 def datetime_modifier(pathl):
     last_start_time=datetime.datetime
     last_travel_time=datetime.datetime
+    day_plus=0 #day increasement.
     first_time=True   #in the first time we should not modify the date, see it as a principle
     for hop in pathl:
         if(not first_time):
-            if(hop[7].hour<last_start_time.hour): #overnight
-                date=hop[7]
-                hour=date.hour
-                day=date.day+1
-                minute=date.minute
-                year=date.year
-                month=date.month
-                hop[7]=datetime.datetime(year, month, day,hour,minute)
+            #if(hop[7].hour<last_start_time.hour): #overnight #old implementation
+            if((hop[7]%day_weight)<(last_start_time%day_weight)):   #overnight.
+                day_plus+=1
+        hop[7]=add_day(hop[7], day_plus)
         last_start_time=hop[7]
         last_travel_time=hop[4]
         first_time=False
 
-def total_time(pathl):
+
+
+
+def calc_total_time(pathl): #calculate the total time for a path list.
     pathl=translata(pathl)
+    datetime_modifier(pathl)
     dest=pathl[-1][1]
     acc=0
-    xtime=0
-    last_start_time=0
-    first_run=True
     for [source, destination, num,
          mode,travel_time, distance, 
          price, start_time] in pathl:    
-        start_time=dtoi(start_time)
-        
-        if(first_run):
-            xtime=start_time
-            first_start_time=start_time
-            acc+=travel_time
-            first_run=False
-        else:
-            if(destination!=dest):
-                acc+=start_time-last_start_time
-            acc+=travel_time
-            last_start_time=start_time
-    return acc+xtime
+        #start_time=dtoi(start_time)     #old implementation.
+        if(destination==dest):
+            print(start_time)
+            acc+=start_time+travel_time
+    return acc
         
 
-def dtoi(datime):
-#    print("day: ",datime.day, "hour: ",datime.hour, "minute: ",datime.minute )
-    return datime.minute+datime.hour*60+datime.day*3600
+dtoi=lambda datime:datime.minute+datime.hour*hour_weight+datime.day*day_weight
 
 def trace(cur_time, pathl):  #curtime should be int.
-   
+    pathl=translata(pathl)
     curtime=cur_time
     datetime_modifier(pathl)
+
     for [source, destination, num,
          mode,travel_time, distance, 
          price, start_time] in pathl:
         
-        start_time=dtoi(start_time)
+        #start_time=dtoi(start_time)   #old implementation.
         '''
+        #test:
         print("cur_time: " ,end='')
         print(curtime)
         print("start time: ", end='')
@@ -128,7 +134,6 @@ def trace(cur_time, pathl):  #curtime should be int.
         print(travel_time)
         print("")
         '''
-        print(start_time)
         if(curtime<start_time): #we are waiting in the bus station. the start_time is morphed into integer.
             return calc_cur_cord(source, destination, 0)
         if(curtime<=start_time+travel_time):
@@ -136,19 +141,16 @@ def trace(cur_time, pathl):  #curtime should be int.
             return calc_cur_cord(source, destination, tperc)
         
         else : #curtime>start_time+travel_time. this implies we are on next hop.
-            curtime=curtime+travel_time
-    
+            
+            pass
+
     
 database=database_binding()
 rt=router_module(0, database)
 
-for obj in rt.minimal_time_path(1, [2,3,4]):
-    print(obj.source, obj.destination, obj.mode, dtoi(obj.start_time))
 
-#for i in range (4320, 8000, 10):
-#    print(trace(i,translata(rt.minimal_time_path(1, [2,3,4]))))
+#test suite.
+for i in range (4320, 7964, 10):
+    print(trace(i,rt.minimal_time_path(1, [2,3,4])))
 
-print(total_time(rt.minimal_time_path(1, [2,3,4])))
-
-
-
+calc_total_time(rt.minimal_time_path(1,[2,3,4]))
