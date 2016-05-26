@@ -87,27 +87,32 @@ void sctp_client::extract_element_from_plain_list(pyl python_list, vpyl& elemv) 
     this->split_by_comma(python_list, elemv);
 }
 
-void sctp_client::plain_pylist_extractor(pyl originl, ivector &container) {
+
+
+template <typename vecto, typename transformer>
+void sctp_client::plain_pylist_extractor(pyl originl, vecto &container, transformer tr) {
     vpyl v;
     originl=parenthesis_smasher(originl, true);
     this->extract_element_from_plain_list(originl, v);
     for(auto x : v){
-        container.emplace_back(std::stoi(x));
+        container.emplace_back(tr(x));
     }
-
 }
-
-void sctp_client::matrix_pylist_extractor(pyl origin, imatrix &matrix) {
+template <typename vecto, typename  transformer>
+void sctp_client::matrix_pylist_extractor(pyl origin, std::vector<vecto> & matrix, transformer tr ) {
     origin=parenthesis_smasher(filter_space(origin), false);
     vpyl lypv;
     origin=this->square_remover(origin);
     extract_sublists(origin, lypv);
     for (auto ppyl : lypv){
-        ivector vi;
-        plain_pylist_extractor(ppyl, vi);
+        vecto vi;
+        plain_pylist_extractor(ppyl, vi, tr);
         matrix.emplace_back(vi);
     }
 }
+
+
+
 /*
 void sctp_client::path_parser(pyl origin, imatrix & path_list, int &time, int & cost){
    origin=parenthesis_smasher(filter_space(origin), false);
@@ -128,24 +133,23 @@ void sctp_client::path_parser(pyl origin, imatrix & path_list, int &time, int & 
 }
 
 */
-/*test
+
 int main(int argc, const char * argv[]) {
+
     sctp_client sc;
     pyl s="[[1,2,3,4,5], [2,4,5,6,7], [5,6,7,8,9],[9,1,2,3,4]]";//query_all
     pyl u="(1,2,3,4,5,6,7)";//query
     pyl t="([[1,2],[2,2],[3,2], 4,-1]], 711,310)"; //path
 
-    ivector vi;
-    sc.plain_pylist_extractor(u, vi);
+    vector<QString> vq;
+    sc.plain_pylist_extractor(u, vq, [](std::string x){return QString::fromStdString(x);});
 
-    imatrix matrix;
-    sc.matrix_pylist_extractor(s, matrix);
+    vector<vector<QString>> matrix;
+    sc.matrix_pylist_extractor(s, matrix, [](std::string x){return QString::fromStdString(x);});
 
-    imatrix mat;
-    int time, cost;
-    sc.path_parser(t, mat, time, cost);
+
+
 
     return 0;
 }
 
-*/
