@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/button1.png</file>
+        <file>../build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/ditu.jpg</file>
+        <file>../build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/yu.png</file>
+    </qresource>
+</RCC>

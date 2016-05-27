@@ -1,0 +1,12 @@
+#ifndef SERVECONNECT_H
+#define SERVECONNECT_H
+
+
+class serveconnect
+{
+public:
+    serveconnect();
+    int
+};
+
+#endif // SERVECONNECT_H
