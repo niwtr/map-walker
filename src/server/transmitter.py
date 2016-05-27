@@ -107,7 +107,7 @@ class M_A_S_S():
         self.server_name=plist['name']
         self.server_welcome_string=plist['welcome']
 
-        self.address=socket.gethostbyname(socket.gethostname())
+        self.address="127.0.0.1"  #socket.gethostbyname(socket.gethostname())
 
         self.com=plist['com']
         self.speed=plist['speed']
