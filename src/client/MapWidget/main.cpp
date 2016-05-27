@@ -21,34 +21,34 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QElapsedTimer t;
     QSplashScreen splash(QPixmap("/Users/apple/Desktop/map/clientmap/build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/yu.png"));
-      splash.setDisabled(true); //禁用用户的输入事件响应
-       splash.show();
-       splash.showMessage(QObject::tr("内存数据库管理器.正在启动中...."),Qt::AlignLeft|Qt::AlignBottom,Qt::white);
-       t.start();
-       while(t.elapsed()<2000)
-       {
-           QCoreApplication::processEvents();
-       }
-       splash.showMessage(QObject::tr("连接服务器...."),Qt::AlignLeft|Qt::AlignBottom,Qt::white);
-       t.start();
-       cn->con();
-       while(t.elapsed()<2000)
-       {
-           QCoreApplication::processEvents();
-       }
-       clientconnect c;
-       qDebug()<<cn->status;
-      if(cn->status==false){
-            QMessageBox::about(NULL,"失败","连接服务器失败");
-           splash.finish(&c);
-           c.close();
-       }
-       else {
-           c.setWindowTitle("地图");
-           c.show();
-           splash.finish(&c);
-       }
-      /* c.show();
+    splash.setDisabled(true); //禁用用户的输入事件响应
+    splash.show();
+    splash.showMessage(QObject::tr("内存数据库管理器.正在启动中...."),Qt::AlignLeft|Qt::AlignBottom,Qt::white);
+    t.start();
+    while(t.elapsed()<2000)
+    {
+        QCoreApplication::processEvents();
+    }
+    splash.showMessage(QObject::tr("连接服务器...."),Qt::AlignLeft|Qt::AlignBottom,Qt::white);
+    t.start();
+    cn->con();
+    while(t.elapsed()<2000)
+    {
+        QCoreApplication::processEvents();
+    }
+    clientconnect c;
+    qDebug()<<cn->status;
+    if(cn->status==false){
+        QMessageBox::about(NULL,"失败","连接服务器失败");
+        splash.finish(&c);
+        c.close();
+    }
+    else {
+        c.setWindowTitle("地图");
+        c.show();
+        splash.finish(&c);
+    }
+    /* c.show();
        splash.finish(&c);*/
 
     return a.exec();

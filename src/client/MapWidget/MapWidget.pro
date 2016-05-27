@@ -30,4 +30,4 @@ FORMS    += mainwindow.ui \
     clientwidget.ui
 
 RESOURCES += \
-    image.qrc
+    map.qrc

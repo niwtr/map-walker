@@ -2,6 +2,8 @@
 #include "ui_clientwidget.h"
 #include "mainwindow.h"
 #include"header.h"
+#include<QColor>
+#include <QGraphicsEffect>
 clientconnect::clientconnect(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::clientconnect)
@@ -9,12 +11,12 @@ clientconnect::clientconnect(QWidget *parent) :
     ui->setupUi(this);
     ui->ip->setText(cn->serverIP->toString());
     ui->port->setText(QString::number(cn->port,10));
-   QTimer*timer=new QTimer(this);
-   timer->start(1000);
+    QTimer*timer=new QTimer(this);
+    timer->start(1000);
 
-   connect(timer,SIGNAL(timeout()),this,SLOT(showtime()));
-     connect(cn,SIGNAL(send_disconnected()),this,SLOT(serverdisconnect()));//接收断开连接信号
-   connect(w,SIGNAL(send_route(vector<vector<QString> >)),this,SLOT(recv_route(vector<vector<QString> >)));
+    connect(timer,SIGNAL(timeout()),this,SLOT(showtime()));
+    connect(cn,SIGNAL(send_disconnected()),this,SLOT(serverdisconnect()));//接收断开连接信号
+    connect(w,SIGNAL(send_route(vector<vector<QString> >)),this,SLOT(recv_route(vector<vector<QString> >)));
 
 }
 
@@ -25,6 +27,22 @@ clientconnect::~clientconnect()
 
 void clientconnect::on_pushButton_clicked()
 {
+    auto *effect = new QGraphicsOpacityEffect(this);
+    QPropertyAnimation *anim = new QPropertyAnimation(effect, "opacity" );
+    ui->pushButton->setGraphicsEffect(effect);
+    anim->setDuration(1000);
+    anim->setStartValue(1);
+    anim->setKeyValueAt(0.5, 0.5);
+    anim->setEndValue(1);
+    anim->setEasingCurve( QEasingCurve::OutCurve);
+    anim->start();
+
+    QTime t;
+    t.start();
+    while(t.elapsed()<500)
+        QCoreApplication::processEvents();
+
+
     w->show();
 
 }
@@ -35,7 +53,7 @@ void clientconnect::serverdisconnect(){
 }
 void clientconnect::showtime(){
 
-   count++;
+    count++;
     ui->time->setText(QDateTime::currentDateTime().toString("hh:mm:ss"));//QString::number(count,10));//
 }
 void clientconnect::closeEvent(QCloseEvent *){
@@ -65,6 +83,13 @@ void clientconnect::recv_route(vector<vector<QString>>matrix){
 
             }
             else ui->show_information->setItem(i,p,new QTableWidgetItem(matrix[i][p]));
+            auto color=new QColor(100,100,100);
+            ui->show_information->item(i, p)->setBackgroundColor(*color);
+            auto fnt=new QFont("PT Mono");
+            ui->show_information->item(i, p)->setTextAlignment(Qt::AlignCenter);
+            ui->show_information->item(i, p)->setFont(*fnt);
+
+
         }
     }
     ui->alldistance->setText(QString::number(all_distance,10));

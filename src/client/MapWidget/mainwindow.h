@@ -21,6 +21,7 @@
 #include<QDebug>
 #include<QObject>
 #include"sctp_client.h"
+#include <QPropertyAnimation>
 namespace Ui {
 class MainWindow;
 

@@ -4,6 +4,9 @@
 #include"mapwidget.h"
 #include"sctp_client.h"
 #include<QBitmap>
+#include <QColor>
+#include <QPalette>
+#include<QGraphicsEffect>
 //extern sctp::sctp_client sc;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -12,8 +15,10 @@ MainWindow::MainWindow(QWidget *parent) :
     pause=1;
     speed=1000;
     faster=0;
-       //timer->start(1000);
+    //timer->start(1000);
     ui->setupUi(this);
+
+    this->setAttribute(Qt::WA_TranslucentBackground, true);
     connect(timer,SIGNAL(timeout()),this,SLOT(time_count()));
     connect(ui->slider,SIGNAL(valueChanged(int)),this,SLOT(slotzoom(int)));
     connect(this,SIGNAL(sendslotzoom(int)),ui->mapw,SLOT(setslotzoom(int)));//将此界面上的滚动条值发送给地图显示界面
@@ -26,6 +31,53 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->traveltimeh->hide();
     connect(ui->three,SIGNAL(toggled(bool)),ui->traveltimeh,SLOT(setVisible(bool)));
     button_pic();
+
+
+
+    ui->tracer->setParent(this);
+    ui->pushButton_2->setParent(this);
+    QPropertyAnimation *ani = new QPropertyAnimation(ui->widget, "windowOpacity");
+    ani->setDuration(100);
+    ani->setStartValue(1);
+    ani->setEndValue(0.5);
+
+    auto *effect = new QGraphicsOpacityEffect(this);
+    effect->setOpacity(0.9);
+    ui->widget->setGraphicsEffect(effect);
+
+    auto *effect2 = new QGraphicsOpacityEffect(this);
+    effect2->setOpacity(0.8);
+    ui->widget_2->setGraphicsEffect(effect2);
+
+
+    auto *effect3 = new QGraphicsOpacityEffect(this);
+    effect3->setOpacity(0.7);
+    ui->widget_3->setGraphicsEffect(effect3);
+
+
+    auto *effect4 = new QGraphicsOpacityEffect(this);
+    effect4->setOpacity(0.6);
+    ui->widget_4->setGraphicsEffect(effect4);
+
+
+    auto *effect5 = new QGraphicsOpacityEffect(this);
+    effect5->setOpacity(0.9);
+    ui->traveltimeh->setGraphicsEffect(effect5);
+
+
+
+
+    auto *effect6 = new QGraphicsOpacityEffect(this);
+    effect6->setOpacity(0.8);
+    ui->mapw->setGraphicsEffect(effect6);
+
+    ui->slider->hide();
+
+    QPalette pal;
+    pal.setColor(QPalette::WindowText, QColor(255,255,255));
+    ui->label_3->setPalette(pal);
+    ui->label_4->setPalette(pal);
+    //ui->label_5->setPalette(pal);
 }
 
 MainWindow::~MainWindow()
@@ -210,7 +262,7 @@ void MainWindow::setplace(QPointF place){
     if(cn->sendbuff1.size()>=1)
         ui->sourse->setText(city_name[cn->sendbuff1[0].toInt()-1]);
     //if(cn->sendbuff1.size()>=2)
-       // ui->destination->setText(city_name[cn->sendbuff1[1].toInt()-1]);
+    // ui->destination->setText(city_name[cn->sendbuff1[1].toInt()-1]);
     //ui->sourse->text().isEmpty()
     \
 }
@@ -223,6 +275,21 @@ void MainWindow::setplace(QPointF place){
 
 void MainWindow::on_pushButton_3_clicked()
 {
+
+    auto *effect = new QGraphicsOpacityEffect(this);
+    QPropertyAnimation *anim = new QPropertyAnimation(effect, "opacity" );
+    ui->pushButton_3->setGraphicsEffect(effect);
+    anim->setDuration(1000);
+    anim->setStartValue(1);
+    anim->setKeyValueAt(0.5, 0);
+    anim->setEndValue(1);
+    anim->setEasingCurve( QEasingCurve::OutCurve);
+    anim->start();
+    QTime t;
+    t.start();
+    while(t.elapsed()<500)
+        QCoreApplication::processEvents();
+
     //清空缓冲区  界面线路  以及所有显示等
     cn->sendbuff1.clear();
     ui->mapw->clearmap();
@@ -231,12 +298,28 @@ void MainWindow::on_pushButton_3_clicked()
     travel_time=0;
     ui->mapw->scene->removeItem(ui->mapw->cursor);
     start_and_stop=0;
-    ui->tracer->setText("开始旅行");
     //ui->destination->clear();
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {   //[source, destination, num,mode,travel_time, distance, price, start_time]
+
+    auto *effect = new QGraphicsOpacityEffect(this);
+    QPropertyAnimation *anim = new QPropertyAnimation(effect, "opacity" );
+    ui->pushButton_2->setGraphicsEffect(effect);
+    anim->setDuration(1000);
+    anim->setStartValue(1);
+    anim->setKeyValueAt(0.5, 0);
+    anim->setEndValue(1);
+    anim->setEasingCurve( QEasingCurve::OutCurve);
+    anim->start();
+
+    QTime t;
+    t.start();
+    while(t.elapsed()<500)
+        QCoreApplication::processEvents();
+
+
     //显示路线
     if(cn->sendbuff1.size()<2)
         QMessageBox::about(NULL,"错误","请选择起点与目的地");
@@ -248,13 +331,13 @@ void MainWindow::on_pushButton_2_clicked()
         cn->sendserver();
         qDebug()<<cn->sendtoserver;
         vector<vector<QString>> matrix;
-       t.start();
+        t.start();
         while(t.elapsed()<5000 and (not cn->able_to_send))
         {
             QCoreApplication::processEvents();
         }
         //qDebug()<<cn->able_to_send;
-       /* while(cn->able_to_send==false){
+        /* while(cn->able_to_send==false){
         qDebug()<<cn->able_to_send;
         }*/
         if(cn->msg=="[]"){
@@ -265,15 +348,15 @@ void MainWindow::on_pushButton_2_clicked()
             cn->route_table=cn->msg;//保存路径表
             qDebug()<<cn->msg;
 
-        emit send_route(matrix);
-        for(long p=0;p<matrix.size();p++){
-            QPointF s;
-            s=coordinate[matrix[p][0].toInt()-1];
-            QPointF d;
-            d=coordinate[matrix[p][1].toInt()-1];
-            ui->mapw->scene->addLine(s.x(),s.y(),d.x(),d.y(),ui->mapw->p);
+            emit send_route(matrix);
+            for(long p=0;p<matrix.size();p++){
+                QPointF s;
+                s=coordinate[matrix[p][0].toInt()-1];
+                QPointF d;
+                d=coordinate[matrix[p][1].toInt()-1];
+                ui->mapw->scene->addLine(s.x(),s.y(),d.x(),d.y(),ui->mapw->p);
+            }
         }
-      }
     }
 
 }
@@ -288,6 +371,10 @@ void MainWindow::on_fangda_clicked()
 }
 
 void MainWindow::on_suoxiao_clicked()
+
+
+
+
 {   count=ui->slider->value();
     if(count>ui->slider->minimumHeight()){
         count-=2;
@@ -296,63 +383,81 @@ void MainWindow::on_suoxiao_clicked()
 
 }
 void MainWindow::button_pic(){
-    QPixmap big,small;
-    QIcon big1,small1;
-        big.load("/Users/apple/Desktop/map/clientmap/build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/zoomin.png");
-        small.load("/Users/apple/Desktop/map/clientmap/build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/zoomout.png");
-        big1.addPixmap(big);
-        small1.addPixmap(small);
-        //ui->fangda->setFixedSize(big.width(),big.height());
-        ui->fangda->setIcon(big);
-        ui->fangda->setIconSize(QSize(big.width(),big.height()));
-        ui->fangda->setMask(big.mask());
-        //ui->suoxiao->setFixedSize(small.width(),small.height());
-        ui->suoxiao->setIcon(small);
-        ui->suoxiao->setIconSize(QSize(small.width(),small.height()));
-        ui->suoxiao->setMask(small.mask());
+    //    QPixmap big,small;
+    //    QIcon big1,small1;
+    //big.load("/Users/apple/Desktop/map/clientmap/build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/zoomin.png");
+    //small.load("/Users/apple/Desktop/map/clientmap/build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/zoomout.png");
+    //        big1.addPixmap(big);
+    //        small1.addPixmap(small);
+    //ui->fangda->setFixedSize(big.width(),big.height());
+    //        ui->fangda->setIcon(big);
+    //        ui->fangda->setIconSize(QSize(big.width(),big.height()));
+    //        ui->fangda->setMask(big.mask());
+    //ui->suoxiao->setFixedSize(small.width(),small.height());
+    //        ui->suoxiao->setIcon(small);
+    //      ui->suoxiao->setIconSize(QSize(small.width(),small.height()));
+    //      ui->suoxiao->setMask(small.mask());
 }
 
 void MainWindow::on_tracer_clicked()
 //旅行或暂停
 {
+
+    auto *effect = new QGraphicsOpacityEffect(this);
+    QPropertyAnimation *anim = new QPropertyAnimation(effect, "opacity" );
+    ui->tracer->setGraphicsEffect(effect);
+    anim->setDuration(1000);
+    anim->setStartValue(1);
+    anim->setKeyValueAt(0.5, 0);
+    anim->setEndValue(1);
+    anim->setEasingCurve( QEasingCurve::OutCurve);
+    anim->start();
+
+    QTime t;
+    t.start();
+    while(t.elapsed()<500)
+        QCoreApplication::processEvents();
+
+
+
     if(start_and_stop==0){
 
-    if(cn->route_table=="empty")
-        QMessageBox::about(NULL,"错误","无效路径");
-     else{
-    QElapsedTimer t;
-     cn->tracer_send("start-time::",0);
-     t.start();
-    while(t.elapsed()<5000 and (not cn->able_to_send))
-    {
-        QCoreApplication::processEvents();
-    }
+        if(cn->route_table=="empty")
+            QMessageBox::about(NULL,"错误","无效路径");
+        else{
+            QElapsedTimer t;
+            cn->tracer_send("start-time::",0);
+            t.start();
+            while(t.elapsed()<5000 and (not cn->able_to_send))
+            {
+                QCoreApplication::processEvents();
+            }
 
-    cn->start_time=cn->msg.toInt();
-    cn->tracer_send("end-time::",0);
-    t.start();
-    while(t.elapsed()<5000 and (not cn->able_to_send))
-    {
-        QCoreApplication::processEvents();
-    }
-     cn->end_time=cn->msg.toInt();
-      qDebug()<<cn->end_time<<cn->start_time;
-      ui->mapw->create_cursor();
-      start_and_stop++;
-    }
+            cn->start_time=cn->msg.toInt();
+            cn->tracer_send("end-time::",0);
+            t.start();
+            while(t.elapsed()<5000 and (not cn->able_to_send))
+            {
+                QCoreApplication::processEvents();
+            }
+            cn->end_time=cn->msg.toInt();
+            qDebug()<<cn->end_time<<cn->start_time;
+            ui->mapw->create_cursor();
+            start_and_stop++;
+        }
     }
     if(start_and_stop>=1){
         if(start_and_stop%2==1){
-             start_and_stop++;//顺序很重要！！！！！！！！！！！
-         timer->start(speed) ;//100毫秒超时 触发时间+1，1秒等于10秒
-            ui->tracer->setText("暂停旅行");
-             coordinate_recv();
+            start_and_stop++;//顺序很重要！！！！！！！！！！！
+            timer->start(speed) ;//100毫秒超时 触发时间+1，1秒等于10秒
+            ui->tracer->setStyleSheet("border-image:url(:/mapr/pause-circle-o.png)");
+            coordinate_recv();
 
         }
-    else{   pause=1;
+        else{   pause=1;
             timer->stop();
-            ui->tracer->setText("继续旅行");
-             start_and_stop++;
+            ui->tracer->setStyleSheet("border-image:url(:/mapr/watch.png)");
+            start_and_stop++;
         }
     }
 
@@ -363,57 +468,59 @@ void MainWindow::on_tracer_clicked()
 
 }
 void MainWindow::coordinate_recv(){
-     QElapsedTimer t;
-     pause=0;
+    QElapsedTimer t;
+    pause=0;
     while(pause==0&&(travel_time+cn->start_time)<=cn->end_time){
         cn->tracer_send(("trace::["+QString::number(travel_time+cn->start_time,10) +","),1);
         t.start();
-       while(t.elapsed()<5000 and (not cn->able_to_send))
-    {
-           QCoreApplication::processEvents();
-       }
-    qDebug()<<cn->msg;
-    vector<QString> vq;
+        while(t.elapsed()<5000 and (not cn->able_to_send))
+        {
+            QCoreApplication::processEvents();
+        }
+        qDebug()<<cn->msg;
+        vector<QString> vq;
 
-       sc.plain_pylist_extractor(cn->msg.toStdString(), vq, [](std::string x){return QString::fromStdString(x);});
+        sc.plain_pylist_extractor(cn->msg.toStdString(), vq, [](std::string x){return QString::fromStdString(x);});
 
-       ui->mapw->show_cursor(vq[0].toFloat(),vq[1].toFloat());
+        ui->mapw->show_cursor(vq[0].toFloat(),vq[1].toFloat());
     }
 }
 
 void MainWindow::on_kuaijin_clicked()
 {//快进
+
+    ui->kuaijin->raise();
     switch(faster){
     case 0:speed=500;
-           ui->kuaijin->setText("x2");
-           faster++;
+        ui->kuaijin->setStyleSheet("border-image:url(:/mapr/X2.png)");
+        faster++;
         break;
     case 1:speed=250;
-           ui->kuaijin->setText("x4");
-           faster++;
+        ui->kuaijin->setStyleSheet("border-image:url(:/mapr/X4.png)");
+        faster++;
         break;
     case 2:speed=125;
-        ui->kuaijin->setText("x8");
+        ui->kuaijin->setStyleSheet("border-image:url(:/mapr/X8.png)");
         faster++;
         break;
-     case 3:speed=100;
-        ui->kuaijin->setText("x10");
+    case 3:speed=100;
+        ui->kuaijin->setStyleSheet("border-image:url(:/mapr/X10.png)");
         faster++;
         break;
-     case 4:speed=50;
-        ui->kuaijin->setText("x20");
+    case 4:speed=50;
+        ui->kuaijin->setStyleSheet("border-image:url(:/mapr/X20.png)");
         faster++;
         break;
-     case 5:speed=20;
-        ui->kuaijin->setText("x50");
+    case 5:speed=20;
+        ui->kuaijin->setStyleSheet("border-image:url(:/mapr/X50.png)");
         faster++;
         break;
-     case 6:speed=10;
-        ui->kuaijin->setText("x100");
+    case 6:speed=10;
+        ui->kuaijin->setStyleSheet("border-image:url(:/mapr/X100.png)");
         faster++;
         break;
-     case 7:speed=1000;
-        ui->kuaijin->setText("x1");
+    case 7:speed=1000;
+        ui->kuaijin->setStyleSheet("border-image:url(:/mapr/X1.png)");
         faster=0;
     }
     timer->start(speed);

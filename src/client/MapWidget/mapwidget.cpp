@@ -2,25 +2,25 @@
 #include"mainwindow.h"
 //在MAINWINDOW的UI界面中将手动添加的QGRAPHICSVIEW界面(ui->mapw)提升为这个类，可使用这些函数
 mapwidget::mapwidget(QWidget *parent):
-QGraphicsView(parent)
+    QGraphicsView(parent)
 
 {     setMouseTracking(true);
-       zoom=0;
-    map.load("/Users/apple/Desktop/map/clientmap/build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/ditu.jpg");
-    citybutton.load("/Users/apple/Desktop/map/clientmap/build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/button1.png");
-    cursor_pic.load("/Users/apple/Desktop/map/clientmap/MapWidget/cursor.png");
+      zoom=0;
+        map.load(":/mapr/ditu.png");
+        citybutton.load(":/mapr/button1.png");
+        cursor_pic.load(":/mapr/pin.png");
 
-      p.setWidth(10);
-      p.setColor(QColor("blue"));
-        //p.setStyle(Qt::PenStyle);
-    initmap();
-     //scene->addLine(434,265,351,431,p);
+              p.setWidth(10);
+                p.setColor(QColor("blue"));
+                  //p.setStyle(Qt::PenStyle);
+                  initmap();
+                    //scene->addLine(434,265,351,431,p);
 
-        //simtour();
-        //scene->addPath()
-        //ui->mapwidget->resize(map.width()+10, map.height()+10);
+                    //simtour();
+                    //scene->addPath()
+                    //ui->mapwidget->resize(map.width()+10, map.height()+10);
 
-        //mapwidget->show();
+                    //mapwidget->show();
 }
 mapwidget::~mapwidget(){
 
@@ -91,8 +91,8 @@ void mapwidget::setslotzoom(int value){
     }
     else{
         s=pow(1/1.01,(zoom-value));
-  }
-   this->scale(s,s);
+    }
+    this->scale(s,s);
 
     zoom=value;
 }
@@ -112,7 +112,7 @@ void mapwidget::create_cursor(){//让游标在线的上面
 }
 
 void mapwidget::show_cursor(qreal x,qreal y){
-    cursor->setPos(x-20,y-10);
+    cursor->setPos(x-20,y-30);
     cursor->show();
 }
 
@@ -136,7 +136,7 @@ void mapwidget::show_cursor(qreal x,qreal y){
 }*/
 void mapwidget::clearmap(){
     //scene->clear();
-   // x=this->verticalScrollBar()->value();
+    // x=this->verticalScrollBar()->value();
     //y=this->horizontalScrollBar()->value();
     scene=new QGraphicsScene;
 

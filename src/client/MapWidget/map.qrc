@@ -1,0 +1,30 @@
+<RCC>
+    <qresource prefix="/mapr">
+        <file>cursor.png</file>
+        <file>yu.png</file>
+        <file>button1.png</file>
+        <file>deepblaq.png</file>
+        <file>ditu.png</file>
+        <file>grayx.png</file>
+        <file>X1.png</file>
+        <file>X2.png</file>
+        <file>X4.png</file>
+        <file>X10.png</file>
+        <file>map.png</file>
+        <file>watch.png</file>
+        <file>location-route.png</file>
+        <file>pause-circle-o.png</file>
+        <file>minuslite.png</file>
+        <file>pluslite.png</file>
+        <file>refresh.png</file>
+        <file>check.png</file>
+        <file>round.png</file>
+        <file>X8.png</file>
+        <file>X20.png</file>
+        <file>X50.png</file>
+        <file>X100.png</file>
+        <file>pin.png</file>
+        <file>main.png</file>
+        <file>main.jpg</file>
+    </qresource>
+</RCC>
