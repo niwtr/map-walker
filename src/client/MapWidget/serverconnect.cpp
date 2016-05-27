@@ -15,7 +15,7 @@ connectserver::    ~connectserver(){
 }
 
 void connectserver::con(){
-        serverIP->setAddress("127.0.0.1");
+        serverIP->setAddress("119.29.232.198");
 
         tcpSocket->connectToHost(*serverIP,port);
        //bool t=tcpSocket->waitForConnected();//判断连接成功
@@ -38,7 +38,7 @@ void connectserver::sth(){
      if(information.size()>1){
      port=information[1].toInt();
 
-     tcpSocket2->connectToHost("127.0.0.1",port);
+     tcpSocket2->connectToHost("119.29.232.198",port);
      status=tcpSocket2->waitForConnected();//判断连接成功
      connect(tcpSocket2,SIGNAL(disconnected()),this,SLOT(send_dis()));
      connect(tcpSocket2,SIGNAL(readyRead()),this,SLOT(recv_route()));

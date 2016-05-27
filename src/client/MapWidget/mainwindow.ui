@@ -48,6 +48,16 @@
       <height>0</height>
      </size>
     </property>
+    <property name="styleSheet">
+     <string notr="true">QScrollBar:horizontal {
+    height: 0px;
+    margin: 0px 0 0px 0;
+}
+QScrollBar:vertical{
+height:0px;
+margin:0px 0 0px 0;
+}</string>
+    </property>
    </widget>
    <widget class="QLabel" name="label_4">
     <property name="geometry">

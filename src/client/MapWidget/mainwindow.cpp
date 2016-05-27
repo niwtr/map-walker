@@ -17,7 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
     faster=0;
     //timer->start(1000);
     ui->setupUi(this);
-
+    setWindowFlags(Qt::FramelessWindowHint);
+     setWindowFlags(windowFlags()&~Qt::WindowCloseButtonHint&~Qt::WindowContextHelpButtonHint);
     this->setAttribute(Qt::WA_TranslucentBackground, true);
     connect(timer,SIGNAL(timeout()),this,SLOT(time_count()));
     connect(ui->slider,SIGNAL(valueChanged(int)),this,SLOT(slotzoom(int)));
@@ -46,17 +47,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widget->setGraphicsEffect(effect);
 
     auto *effect2 = new QGraphicsOpacityEffect(this);
-    effect2->setOpacity(0.8);
+    effect2->setOpacity(0.7);
     ui->widget_2->setGraphicsEffect(effect2);
 
 
     auto *effect3 = new QGraphicsOpacityEffect(this);
-    effect3->setOpacity(0.7);
+    effect3->setOpacity(0.5);
     ui->widget_3->setGraphicsEffect(effect3);
 
 
     auto *effect4 = new QGraphicsOpacityEffect(this);
-    effect4->setOpacity(0.6);
+    effect4->setOpacity(0.3);
     ui->widget_4->setGraphicsEffect(effect4);
 
 
@@ -298,6 +299,9 @@ void MainWindow::on_pushButton_3_clicked()
     travel_time=0;
     ui->mapw->scene->removeItem(ui->mapw->cursor);
     start_and_stop=0;
+
+    ui->tracer->setStyleSheet("border-image:url(:/mapr/watch.png)");
+
     //ui->destination->clear();
 }
 
