@@ -4,13 +4,13 @@
 This is the repository for Data Structure assignments of a BUPT team.
 Current developer:
 
-Tianrui Niu the mechanism designer, vital developer
+Tianrui Niu the mechanism designer, artist
 Contact: heranort@163.com
 
-Han Liu the algol implementor, vital developer
+Han Liu the algorithm implementor, database manager
 Contact: liuhan132@foxmail.com
 
-Mo Ying the algorithm implementor, vital developer
+Mo Ying the GUI designer, vital developer
 Contact: 1456415911@qq.com
 
 ## Current development process
@@ -55,11 +55,31 @@ Added core algorithm of minimal-cost.
 2016-4-9
 Added core module. It serves as the main interface to the whole software. The Map-Walker is now usable!
 
+2016-5-23
+Added Python List-\>C++ Vector parser, serve as a translator between client and server.
+
+2016-5-23
+Added departure time of each station, marks as a new era.
+
+2016-5-24
+Updated the database module.
+
+2016-5-24
+Updated minimal cost guiding algorithm.
+
+2016-5-24
+Updated minimal time guiding algorithm.
+
+2016-5-25
+Implemented tracer, the simulator.
+
+2016-5-25
+Renewed core interface. Slashed the flash screen problem.
+
 
 
 ## License
 We use MIT License.
 Each distribution of this software must contain a copy of a LICENSE file.
 See that file for detail. If you haven't received that copy, contact the developers above.
-
 

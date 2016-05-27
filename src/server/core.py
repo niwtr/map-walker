@@ -181,21 +181,31 @@ class shelled_core(core_domain):
         self.prinl('-')
         count=1
         for mail in mail_box.history:
-            print(str(count)+': '+'Mail from ',mail('tag'),'with content ',mail('describe'))
+            #print(str(count)+': '+'Mail from ',mail('tag'),'with content ',mail('describe'))
+            print(str(count)+': ',mail('describe'))
+            count+=1
             
         self.prinl('*')
         print('Press o to return to main interface.')
 
     def main_interface(self):
         self.prinl('-')
-        print('Main interface.')
+        print('''
+        Map-Walker, the ULTIMATE solution to online path guiding
+        Current Version: 0.5
+        Developers:
+                     Tianrui Niu,
+                     Han Liu, 
+                     Mo Ying
+        Make fun.
+        ''')    
         self.prinl('-') 
+        print('Press l to check license.')
         print('Press m for server monitor')
         print('Press k to kill a server')
-        print('Press q or <esc> to quit')
         print('Press t to check transmitter mailbox history')
         print('Press c to check core mailbox history')
-
+        print('Press q or <esc> to quit')
     def server_monitor_interface(self):
         servs=self.transmitter.get_server_status()
         ids=servs['idling']
@@ -227,6 +237,8 @@ class shelled_core(core_domain):
                 c = sys.stdin.read(1)
                 
                 if c == '\x1b' or c=='q': 
+                    print("Moriturus te saluto.")
+                    time.sleep(1)
                     self.status='exit'
                     break
     
@@ -239,6 +251,8 @@ class shelled_core(core_domain):
                 elif c=='t': self.status='tmail'
                 
                 elif c=='c': self.status='cmail'    
+                
+                elif c=='l': self.status='license'
                 
                 elif c==' ': pass
                 self.__event=True
@@ -256,14 +270,15 @@ class shelled_core(core_domain):
                 
             elif self.status=='server monitor':
                 self.prinl('-')
-                print('Server monitor.')
+                print('Map-Walker Server Monitor.')
                 self.prinl('-')
                 self.server_monitor_interface()
                 self.prinl('-')
                 print('Pass o to return to main interface.')
                 self.prinl('-')
                  
-            elif self.status=='exit':                
+            elif self.status=='exit':   
+
                 break
                 
             elif self.status=='kill':
@@ -282,6 +297,33 @@ class shelled_core(core_domain):
 
             elif self.status=='tmail':
                 self.mailbox_monitor_interface(self.transmitter.tmail)
+            elif self.status=='license':
+                self.prinl('-')
+                print('''
+                The MIT License (MIT)
+
+Copyright (c) 2016 niwtr
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+                ''')
+                self.prinl('-')
+                
                 
             sys.stdout.flush()
             while(not self.__event and self.status!='exit'):
