@@ -21,7 +21,7 @@ from log import log_file
 from datab import vehicle
 
 def translata(raw_pathl):  
-    day_weight=3600
+    day_weight=1440
     hour_weight=60
     minute_weight=1
     moddict={vehicle.bus : 2,
@@ -43,6 +43,10 @@ def transfer(date_time):
     minute = temp_time % 60
     temp_time = str(int(hour)) + ':' + str(int(minute))
     return datetime.datetime.strptime(temp_time, '%H:%M')
+
+#the reverse of transfer function
+def transfer_reverse(date_time):
+     return (date_time.hour * 60 + date_time.minute)
 
 '''
 Write the current route to history.
@@ -171,7 +175,7 @@ class router_module:
             if(min_path[i]):
                 dis[i] = min_path[i].travel_time
                 path[i] = [min_path[i]]
-                last_time[i] = transfer(min_path[i].travel_time)
+                last_time[i] = transfer(min_path[i].travel_time + transfer_reverse(min_path[i].start_time))
 
         final[source] = True
         k = -1     #the last arrive city id
@@ -195,7 +199,7 @@ class router_module:
                         dis[q] = min_temp + dis[k]
                         path[q] = copy.deepcopy(path[k])
                         path[q].append(temp_path)
-                        last_time[q] = transfer(dis[q])
+                        last_time[q] = transfer(dis[q] + transfer_reverse(path[q][0].start_time))
 
             for w in range(10):   #from the select city to update others
                 (min_temp, temp_path) = dyn_find_next(k, w, last_time)
@@ -203,7 +207,7 @@ class router_module:
                     dis[w] = dis[k] + min_temp
                     path[w] = copy.deepcopy(path[k])
                     path[w].append(temp_path)
-                    last_time[w] = transfer(dis[w])
+                    last_time[w] = transfer(dis[w] + path[w][0].start_time)
         return translata(path[k])
 
     def restricted_minimal_cost_path(self, source, destination, restrict):
@@ -259,7 +263,7 @@ class router_module:
 
             #detect whether finishing the search
             if(cur_node.isFindAns()):
-                min_temp = 1000000
+                min_temp = 10000000
                 rtn_path = []
                 for w in ans:
                     price = 0
@@ -282,13 +286,14 @@ class router_module:
                     for element in restrict_data_path[cur_id-1][i-1]:
 
                         #calculate the using-time for the next city
-                        arrive_time = transfer(cur_node.cur_time)
                         payload = 0
-                        if(arrive_time > element.start_time):
-                            payload = 24*60 - (arrive_time - element.start_time).seconds/60
-                        else:
-                            payload = (element.start_time - arrive_time).seconds/60
-                        payload += element.travel_time
+                        if(cur_node.cur_time > 0):
+                            arrive_time = transfer(cur_node.cur_time + transfer_reverse(cur_node.cur_path[0].start_time))
+                            if(arrive_time > element.start_time):
+                                payload = 24*60 - (arrive_time - element.start_time).seconds/60
+                            else:
+                                payload = (element.start_time - arrive_time).seconds/60
+                        payload = element.travel_time + payload
 
                         temp_node = path_node(cur_node.cur_path, element, cur_node.cur_time + payload)
                         cur_node.addChild(temp_node)
@@ -298,6 +303,7 @@ class router_module:
                             temp_node.live = False
                         if(temp_node.live):
                             if(temp_node.isFindAns()):
+                                # print(temp_node.cur_time, translata(temp_node.cur_path))
                                 ans.append(temp_node)
                             q.put(temp_node)
         return []
@@ -307,7 +313,7 @@ if(__name__ == '__main__'):
     router_path = router_module(0 ,database)
     time_path = router_path.minimal_time_path(1, [2, 3])
     cost_path = router_path.minimal_cost_path(1, [2, 3])
-    restrict_path = router_path.restricted_minimal_cost_path(1, [2, 3, 4], 750)
+    restrict_path = router_path.restricted_minimal_cost_path(1, [2, 3], 500)
     print(cost_path)
     print(time_path)
     print(restrict_path)
