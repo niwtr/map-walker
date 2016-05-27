@@ -15,9 +15,11 @@ Design: Heranort, L.Laddie
 
 import mailer
 import copy, datetime
+import queue
 from datab import database_binding
 from log import log_file
 from datab import vehicle
+
 def translata(raw_pathl):  
     day_weight=3600
     hour_weight=60
@@ -33,6 +35,14 @@ def translata(raw_pathl):
                     obj.distance, obj.price, dtoi(obj.start_time)])
 
     return acc
+
+#transfer the time to datatime format
+def transfer(date_time):
+    temp_time = date_time % (24 * 60)
+    hour = temp_time / 60
+    minute = temp_time % 60
+    temp_time = str(int(hour)) + ':' + str(int(minute))
+    return datetime.datetime.strptime(temp_time, '%H:%M')
 
 '''
 Write the current route to history.
@@ -125,14 +135,6 @@ class router_module:
         min_path = [[] for i in range(10)]
         inf = 1000000
 
-        #transfer the time to datatime format
-        def transfer(date_time):
-            temp_time = date_time % (24 * 60)
-            hour = temp_time / 60
-            minute = temp_time % 60
-            temp_time = str(int(hour)) + ':' + str(int(minute))
-            return datetime.datetime.strptime(temp_time, '%H:%M')
-
         #dynamic find the next minimal path
         def dyn_find_next(i, j, last_time):
             min_temp = inf
@@ -205,6 +207,39 @@ class router_module:
         return translata(path[k])
 
     def restricted_minimal_cost_path(self, source, destination, restrict):
+
+        class path_node:
+            '''
+            Define a tree node in the search-tree
+            '''
+            def __init__(self, parent_path, last_path, cur_time):
+                self.child_node = []
+                self.city_arrive = [False for i in range(11)]
+                self.live = True
+                self.cur_path = copy.deepcopy(parent_path)
+                if(last_path):
+                    self.cur_path.append(last_path)
+                self.last_path = last_path
+                self.cur_time = cur_time
+                self.countCityArrive()
+
+            def countCityArrive(self):
+                for element in self.cur_path:
+                    self.city_arrive[element.source] = True
+                    self.city_arrive[element.destination] = True
+
+            def isFindAns(self):
+                is_find = True
+                for i in range(1, 11, 1):
+                    if(destination.count(i) and not self.city_arrive[i]):
+                        is_find = False
+                        break
+                return is_find
+
+            def addChild(self, child_node_s):
+                self.child_node.append(child_node_s)
+
+        #prepare the data to cut down the running time
         restrict_data_path = [[[] for i in range(10)] for i in range(10)]
         for i in range(10):
             for j in range(10):
@@ -212,35 +247,67 @@ class router_module:
                     if(element.travel_time <= restrict):
                         restrict_data_path[i][j].append(element)
 
-        inf = 10000000
-        path = [[] for i in range(10)]
-        dp = [[0 for i in range(10)] for i in range(restrict+1)]
-        for i in range(restrict + 1):
-            if(i > 0):
-                for j in range(10):
-                    for ele_path in path[j]:
-                        for ele_data in restrict_data_path[source][j]:
-                            pass
+        source_node = path_node([], [], 0)      #root node
+        cur_node = []           #from queue get the first node
+        ans = []                #reserve all the ans node
+        q = queue.Queue()
+        q.put(source_node)
 
-        # for i in range(9, -1, -1):
-        #     for j in range(restrict + 1):
-        #         if(data_flight_time[source][i] and data_flight_time[source][i][0] <= j):
-        #             dp[j][i] = data_flight_price[source][i][0]
-        #
-        # for i in range(10):
-        #     for l in range(restrict + 1):
-        #         if(data_flight_time[source][i] and l >= data_flight_time[source][i][0]):
-        #             dp[l][i] = min(dp[l][i], dp[l - data_flight_time[source][i][0]][i] + data_flight_price[source][i][0])
-        #
-        # for i in range(10):
-        #     for j in range(restrict+1):
-        #         print(dp[j][i], end=' ')
-        #     print('')
+        #BFS algorithm
+        while(not q.empty()):
+            cur_node = q.get()
+
+            #detect whether finishing the search
+            if(cur_node.isFindAns()):
+                min_temp = 1000000
+                rtn_path = []
+                for w in ans:
+                    price = 0
+                    for p in w.cur_path:
+                        price += p.price
+                    if(price < min_temp):
+                        min_temp = price
+                        rtn_path = w.cur_path
+                if(rtn_path):
+                    return translata(rtn_path)
+
+            if(cur_node == source_node):
+                cur_id = source
+            else:
+                cur_id = cur_node.last_path.destination
+
+            #construct the search-tree by find the child
+            for i in range(1, 11, 1):
+                if(not cur_node.city_arrive.count(i)):
+                    for element in restrict_data_path[cur_id-1][i-1]:
+
+                        #calculate the using-time for the next city
+                        arrive_time = transfer(cur_node.cur_time)
+                        payload = 0
+                        if(arrive_time > element.start_time):
+                            payload = 24*60 - (arrive_time - element.start_time).seconds/60
+                        else:
+                            payload = (element.start_time - arrive_time).seconds/60
+                        payload += element.travel_time
+
+                        temp_node = path_node(cur_node.cur_path, element, cur_node.cur_time + payload)
+                        cur_node.addChild(temp_node)
+
+                        #kill not-needing node to improve speed
+                        if(temp_node.cur_time > restrict):
+                            temp_node.live = False
+                        if(temp_node.live):
+                            if(temp_node.isFindAns()):
+                                ans.append(temp_node)
+                            q.put(temp_node)
+        return []
 
 if(__name__ == '__main__'):
     database = database_binding()
     router_path = router_module(0 ,database)
-    path = router_path.minimal_time_path(1, [2, 3, 4, 5, 6])
-    for element in path:
-        print(element.source, element.destination, element.mode, element.price, element.travel_time, element.start_time)
-    # restrict_path = router_path.restricted_minimal_cost_path(0, [1, 2], 300)
+    time_path = router_path.minimal_time_path(1, [2, 3])
+    cost_path = router_path.minimal_cost_path(1, [2, 3])
+    restrict_path = router_path.restricted_minimal_cost_path(1, [2, 3, 4], 750)
+    print(cost_path)
+    print(time_path)
+    print(restrict_path)
