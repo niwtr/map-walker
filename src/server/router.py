@@ -21,7 +21,7 @@ from log import log_file
 from datab import vehicle
 
 def translata(raw_pathl):  
-    day_weight=3600
+    day_weight=1440
     hour_weight=60
     minute_weight=1
     moddict={vehicle.bus : 2,

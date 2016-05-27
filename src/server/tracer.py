@@ -30,7 +30,7 @@ def get_coordinate(cityid):
              10:(100, 834)}
     return cordict[cityid]
 
-day_weight=3600
+day_weight=1440
 hour_weight=60
 minute_weight=1
 
