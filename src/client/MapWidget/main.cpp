@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QElapsedTimer t;
-    QSplashScreen splash(QPixmap("/Users/apple/Desktop/map/clientmap/build-MapWidget-Desktop_Qt_5_6_0_clang_64bit-Debug/yu.png"));
+    QSplashScreen splash(QPixmap(":/mapr/yu.png"));
     splash.setDisabled(true); //禁用用户的输入事件响应
     splash.show();
     splash.showMessage(QObject::tr("内存数据库管理器.正在启动中...."),Qt::AlignLeft|Qt::AlignBottom,Qt::white);
