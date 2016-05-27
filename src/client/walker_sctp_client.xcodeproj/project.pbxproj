@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DE3D00DD1B7E9E9258F3303B /* sctp_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE3D023F6CFD3F0E9BF79561 /* sctp_client.cpp */; };
+		DE3D0EF08457434630AAADE8 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE3D0F96E4A4C4EDB5C04153 /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,6 +27,7 @@
 		DE3D0219D7BF6F0B7A128421 /* walker_sctp_client */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = walker_sctp_client; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE3D021C4239236758C45904 /* sctp_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sctp_client.h; sourceTree = "<group>"; };
 		DE3D023F6CFD3F0E9BF79561 /* sctp_client.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sctp_client.cpp; sourceTree = "<group>"; };
+		DE3D0F96E4A4C4EDB5C04153 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +62,7 @@
 			children = (
 				DE3D023F6CFD3F0E9BF79561 /* sctp_client.cpp */,
 				DE3D021C4239236758C45904 /* sctp_client.h */,
+				DE3D0F96E4A4C4EDB5C04153 /* main.cpp */,
 			);
 			path = walker_sctp_client;
 			sourceTree = "<group>";
@@ -115,6 +118,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DE3D00DD1B7E9E9258F3303B /* sctp_client.cpp in Sources */,
+				DE3D0EF08457434630AAADE8 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

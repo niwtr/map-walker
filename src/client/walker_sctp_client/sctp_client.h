@@ -23,13 +23,31 @@ namespace  sctp {
          * "[0, 1, 2, 3]" -->  vector<int>, its element being 0, 1 2 and 3.
          */
         template <typename vecto, typename transformer>
-        void plain_pylist_extractor(pyl originl, vecto &container, transformer tr);
+        void plain_pylist_extractor(pyl originl, vecto &container, transformer tr){
+            vpyl v;
+            originl=parenthesis_smasher(originl, true);
+            this->extract_element_from_plain_list(originl, v);
+            for(auto x : v){
+                container.emplace_back(tr(x));
+            }
+        }
         /* parse matrix list into native C++ vector<vector<int>>.
          * example:
          * [[0,1,2],[1,2,3],[2,3,4]]  --> vector<vector<int>>, you know.
          */
         template <typename vecto, typename transformer>
-        void matrix_pylist_extractor(pyl origin, std::vector<vecto> & matrix, transformer tr);
+        void matrix_pylist_extractor(pyl origin, std::vector<vecto> & matrix, transformer tr){
+            origin=parenthesis_smasher(filter_space(origin), false);
+            vpyl lypv;
+            origin=this->square_remover(origin);
+            extract_sublists(origin, lypv);
+            for (auto ppyl : lypv){
+                vecto vi;
+                plain_pylist_extractor(ppyl, vi, tr);
+                matrix.emplace_back(vi);
+            }
+        }
+
         //old implementations:
         //void trace_parser();
         //void path_parser(pyl origin, imatrix &path_list, int &time, int & cost);

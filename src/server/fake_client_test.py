@@ -6,7 +6,7 @@ import time
 import threading
 #get the com.
 
-ip_address=socket.gethostbyname(socket.gethostname())#'10.201.12.244'
+ip_address='119.29.232.198'#socket.gethostbyname(socket.gethostname())#'10.201.12.244'
 ds=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 ds.connect((ip_address,9999))
 print(ds.recv(1024).decode('utf-8'))

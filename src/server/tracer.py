@@ -30,7 +30,7 @@ def get_coordinate(cityid):
              10:(100, 834)}
     return cordict[cityid]
 
-day_weight=3600
+day_weight=1440
 hour_weight=60
 minute_weight=1
 
@@ -103,7 +103,7 @@ def datetime_modifier(pathl):
 
 class tracer_module():
     
-    def calc_end_time(self, pathl): #calculate the total time for a path list.
+    def calc_end_time(self, *pathl): #calculate the total time for a path list.
     #    pathl=translata(pathl)
         pathu=copy.deepcopy(pathl)
         datetime_modifier(pathu)
@@ -117,7 +117,7 @@ class tracer_module():
                 acc+=start_time+travel_time
         return acc
     
-    def calc_start_time(self, pathl):
+    def calc_start_time(self, *pathl):
         #pathl=translata(pathl)
         return pathl[0][7]
     
